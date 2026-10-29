@@ -1,0 +1,1456 @@
+<title>pIIEEckleball - Court & Rotation Manager</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            pickle: {
+              lime: '#a3e635',
+              green: '#15803d',
+              darkgreen: '#14532d',
+              court: '#0d9488',
+              surface: '#0f172a'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.05);
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(100, 116, 139, 0.3);
+      border-radius: 9999px;
+    }
+
+    /* Animated Icons & Emoticon Keyframes */
+    @keyframes pickleBounce {
+      0%, 100% {
+        transform: translateY(0) rotate(0deg) scale(1);
+      }
+      30% {
+        transform: translateY(-8px) rotate(-12deg) scale(1.08);
+      }
+      60% {
+        transform: translateY(2px) rotate(6deg) scale(0.95);
+      }
+      80% {
+        transform: translateY(-2px) rotate(-3deg) scale(1.02);
+      }
+    }
+
+    @keyframes leafSway {
+      0%, 100% { transform: rotate(0deg) scale(1); }
+      50% { transform: rotate(14deg) scale(1.15); }
+    }
+
+    @keyframes energyPulse {
+      0%, 100% { transform: scale(1); filter: drop-shadow(0 0 2px rgba(250, 204, 21, 0.4)); }
+      50% { transform: scale(1.22); filter: drop-shadow(0 0 8px rgba(250, 204, 21, 0.9)); }
+    }
+
+    @keyframes benchSip {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      40% { transform: translateY(-3px) rotate(-8deg); }
+      70% { transform: translateY(1px) rotate(4deg); }
+    }
+
+    @keyframes netVibrate {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.06); }
+    }
+
+    .animate-pickle-bounce {
+      display: inline-block;
+      animation: pickleBounce 2.2s infinite ease-in-out;
+      transform-origin: bottom center;
+    }
+
+    .animate-leaf-sway {
+      display: inline-block;
+      animation: leafSway 2.5s infinite ease-in-out;
+      transform-origin: bottom left;
+    }
+
+    .animate-energy-pulse {
+      display: inline-block;
+      animation: energyPulse 1.6s infinite ease-in-out;
+    }
+
+    .animate-bench-sip {
+      display: inline-block;
+      animation: benchSip 3s infinite ease-in-out;
+    }
+
+    .animate-net-pulse {
+      animation: netVibrate 2.4s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+
+  <!-- Header / Navigation -->
+  <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="relative w-11 h-11 rounded-xl bg-gradient-to-br from-lime-400 via-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-lime-500/25 border border-lime-300/30">
+          <span class="text-2xl animate-pickle-bounce select-none">🏓</span>
+          <span class="absolute -top-1 -right-1 text-xs animate-leaf-sway select-none">🥒</span>
+        </div>
+        <div>
+          <h1 class="font-black text-xl sm:text-2xl tracking-tight text-white flex items-center gap-2">
+            <span>pIIEEckleball</span>
+            <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-lime-400/10 text-lime-400 border border-lime-400/20 flex items-center gap-1">
+              <span class="animate-pulse">●</span> Fair Rotations
+            </span>
+          </h1>
+          <p class="text-xs text-slate-400 hidden sm:flex items-center gap-1">
+            <span>Skill-Balanced Courts</span> &bull; <span>Anti-Bench Flow</span> &bull; <span class="text-lime-400 font-semibold">Keep Dinking! ✨</span>
+          </p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="resetSessionBtn" class="px-3 py-1.5 text-xs font-medium text-slate-300 hover:text-rose-400 border border-slate-700 hover:border-rose-500/30 rounded-lg transition-colors flex items-center gap-1.5">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reset All
+        </button>
+        <span class="h-5 w-px bg-slate-800"></span>
+        <div class="flex items-center gap-1 bg-slate-800/80 p-1 rounded-lg border border-slate-700/60 text-xs">
+          <span class="px-2 py-1 rounded bg-slate-700 text-slate-200 font-semibold flex items-center gap-1">
+            <span class="text-sm animate-pickle-bounce">🎾</span> Round <span id="currentRoundDisplay">0</span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main App Layout -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- Global Alert / Status Banner -->
+    <div id="noticeBanner" class="hidden p-3.5 rounded-xl border flex items-center justify-between text-sm transition-all duration-300">
+      <div class="flex items-center gap-2.5">
+        <i id="noticeIcon" data-lucide="info" class="w-5 h-5 flex-shrink-0"></i>
+        <span id="noticeText">Notification message here</span>
+      </div>
+      <button onclick="dismissNotice()" class="text-slate-400 hover:text-white p-1">
+        <i data-lucide="x" class="w-4 h-4"></i>
+      </button>
+    </div>
+
+    <!-- Top Action Bar: Presets & Mode Summary -->
+    <section class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider mr-1">Quick Presets:</span>
+        <button onclick="loadPreset(12, 6, 2, 'segregated')" class="px-3 py-1.5 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-lime-400 rounded-lg border border-slate-700 hover:border-lime-500/40 transition">
+          12 Players / 2 Courts (6 Beg, 6 Int)
+        </button>
+        <button onclick="loadPreset(16, 8, 3, 'mixed')" class="px-3 py-1.5 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-teal-300 rounded-lg border border-slate-700 hover:border-teal-500/40 transition">
+          16 Players / 3 Courts (Balanced Pairs)
+        </button>
+        <button onclick="loadPreset(8, 4, 2, 'open')" class="px-3 py-1.5 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-sky-300 rounded-lg border border-slate-700 hover:border-sky-500/40 transition">
+          8 Players / 2 Courts (Open Social)
+        </button>
+      </div>
+
+      <!-- Quick Session Stats -->
+      <div class="flex items-center gap-4 text-xs">
+        <div class="flex items-center gap-1.5">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+          <span class="text-slate-400">Playing:</span>
+          <span id="statPlayingCount" class="font-bold text-white">0</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+          <span class="text-slate-400">Benched:</span>
+          <span id="statBenchedCount" class="font-bold text-white">0</span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <span class="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
+          <span class="text-slate-400">Total Players:</span>
+          <span id="statTotalCount" class="font-bold text-white">0</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Main Grid: Left Panel (Setup & Bench & Leaderboard) + Right Panel (Active Courts) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+      <!-- LEFT COLUMN: Controls & Roster (5 cols on lg) -->
+      <div class="lg:col-span-5 space-y-6">
+
+        <!-- 1. Settings / Match Configuration Card -->
+        <div class="bg-slate-950/70 border border-slate-800/90 rounded-2xl p-5 shadow-xl">
+          <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
+            <h2 class="text-base font-bold text-white flex items-center gap-2">
+              <i data-lucide="sliders" class="w-4 h-4 text-lime-400"></i> Match & Court Rules
+            </h2>
+            <span class="text-xs text-slate-400">Configure anytime</span>
+          </div>
+
+          <div class="space-y-4">
+            <!-- Courts and Format -->
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1">
+                  <i data-lucide="grid" class="w-3.5 h-3.5 text-lime-400"></i> Available Courts
+                </label>
+                <div class="flex items-center">
+                  <button type="button" onclick="adjustCourtCount(-1)" class="w-8 h-9 rounded-l-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center justify-center font-bold text-sm">-</button>
+                  <input type="number" id="courtCountInput" min="1" max="12" value="2" class="w-full h-9 bg-slate-900 border-y border-slate-700 text-center font-bold text-white focus:outline-none focus:border-lime-500">
+                  <button type="button" onclick="adjustCourtCount(1)" class="w-8 h-9 rounded-r-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center justify-center font-bold text-sm">+</button>
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1">
+                  <i data-lucide="users" class="w-3.5 h-3.5 text-lime-400"></i> Match Format
+                </label>
+                <select id="formatSelector" class="w-full h-9 bg-slate-900 border border-slate-700 rounded-lg px-2 text-xs font-semibold text-slate-200 focus:outline-none focus:border-lime-500">
+                  <option value="doubles" selected>Doubles (4 / court)</option>
+                  <option value="singles">Singles (2 / court)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Matchmaking Mode -->
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center justify-between">
+                <span class="flex items-center gap-1"><i data-lucide="target" class="w-3.5 h-3.5 text-lime-400"></i> Skill Matchmaking Policy</span>
+              </label>
+              <div class="grid grid-cols-1 gap-2">
+                <label class="relative flex items-center p-2.5 rounded-xl border border-slate-800 bg-slate-900/60 hover:bg-slate-900 cursor-pointer transition">
+                  <input type="radio" name="matchMode" value="segregated" checked class="text-lime-500 focus:ring-0 mr-3">
+                  <div>
+                    <div class="text-xs font-bold text-slate-100 flex items-center gap-1.5">
+                      <span>Tier Segregated</span>
+                      <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded">Target: Beg vs Beg / Int vs Int</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400">Courts reserved for Beginners and Intermediates separately.</p>
+                  </div>
+                </label>
+
+                <label class="relative flex items-center p-2.5 rounded-xl border border-slate-800 bg-slate-900/60 hover:bg-slate-900 cursor-pointer transition">
+                  <input type="radio" name="matchMode" value="mixed" class="text-teal-500 focus:ring-0 mr-3">
+                  <div>
+                    <div class="text-xs font-bold text-slate-100 flex items-center gap-1.5">
+                      <span>Balanced Mixed Pairs</span>
+                      <span class="text-[10px] bg-teal-500/20 text-teal-300 px-1.5 py-0.5 rounded">Mentor: 1 Beg + 1 Int / side</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400">Each team pairs a beginner with an intermediate player for parity.</p>
+                  </div>
+                </label>
+
+                <label class="relative flex items-center p-2.5 rounded-xl border border-slate-800 bg-slate-900/60 hover:bg-slate-900 cursor-pointer transition">
+                  <input type="radio" name="matchMode" value="open" class="text-sky-500 focus:ring-0 mr-3">
+                  <div>
+                    <div class="text-xs font-bold text-slate-100 flex items-center gap-1.5">
+                      <span>Open Social Rotation</span>
+                      <span class="text-[10px] bg-sky-500/20 text-sky-300 px-1.5 py-0.5 rounded">Fair wait time focus</span>
+                    </div>
+                    <p class="text-[11px] text-slate-400">Randomized matchings strictly based on bench wait times.</p>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Fairness Guarantee Note -->
+            <div class="bg-lime-950/20 border border-lime-500/20 rounded-xl p-3 flex items-start gap-2.5">
+              <i data-lucide="shield-check" class="w-4 h-4 text-lime-400 mt-0.5 flex-shrink-0"></i>
+              <p class="text-[11px] text-lime-200/90 leading-relaxed">
+                <strong>Anti-Bench Guarantee:</strong> The rotation algorithm prioritizes players with the highest consecutive bench streak and lowest total games, ensuring no one rests 2 consecutive rounds if court capacity permits.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Player Roster Management -->
+        <div class="bg-slate-950/70 border border-slate-800/90 rounded-2xl p-5 shadow-xl">
+          <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
+            <div>
+              <h2 class="text-base font-bold text-white flex items-center gap-2">
+                <i data-lucide="user-check" class="w-4 h-4 text-lime-400"></i> Player Roster
+                <span id="playerBadgeCount" class="text-xs bg-slate-800 px-2 py-0.5 rounded-full text-slate-300 border border-slate-700">0</span>
+              </h2>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button onclick="bulkSetAllSkill('beginner')" title="Set all to Beginner" class="px-2 py-1 text-[11px] bg-slate-800 hover:bg-slate-700 text-emerald-400 rounded-md border border-slate-700">All Beg</button>
+              <button onclick="bulkSetAllSkill('intermediate')" title="Set all to Intermediate" class="px-2 py-1 text-[11px] bg-slate-800 hover:bg-slate-700 text-teal-400 rounded-md border border-slate-700">All Int</button>
+            </div>
+          </div>
+
+          <!-- Add Single Player Form -->
+          <div class="flex items-center gap-2 mb-3">
+            <input type="text" id="newPlayerName" placeholder="New Player Name..." class="flex-1 h-9 bg-slate-900 border border-slate-700 rounded-lg px-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-lime-500">
+            <select id="newPlayerSkill" class="h-9 bg-slate-900 border border-slate-700 rounded-lg px-2 text-xs font-semibold text-slate-200 focus:outline-none focus:border-lime-500">
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+            </select>
+            <button onclick="addNewPlayerFromInput()" class="h-9 px-3.5 bg-lime-500 hover:bg-lime-400 text-slate-950 font-bold rounded-lg text-xs flex items-center gap-1 transition shadow-md shadow-lime-500/20">
+              <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Add
+            </button>
+          </div>
+
+          <!-- Quick Bulk Generator Accordion / Toggle -->
+          <details class="group mb-4 bg-slate-900/50 rounded-xl border border-slate-800/80 p-2.5 text-xs">
+            <summary class="font-medium text-slate-400 cursor-pointer flex items-center justify-between select-none">
+              <span class="flex items-center gap-1.5 text-slate-300"><i data-lucide="wand-2" class="w-3.5 h-3.5 text-lime-400"></i> Fast Multi-Player Generator</span>
+              <span class="text-[10px] text-slate-500 group-open:rotate-180 transition-transform">▼</span>
+            </summary>
+            <div class="mt-3 pt-3 border-t border-slate-800 grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-1"># Beginners</label>
+                <input type="number" id="bulkBegCount" value="4" min="0" max="30" class="w-full bg-slate-950 border border-slate-700 rounded-md px-2 py-1 text-xs text-white">
+              </div>
+              <div>
+                <label class="block text-[11px] text-slate-400 mb-1"># Intermediates</label>
+                <input type="number" id="bulkIntCount" value="4" min="0" max="30" class="w-full bg-slate-950 border border-slate-700 rounded-md px-2 py-1 text-xs text-white">
+              </div>
+              <div class="col-span-2 pt-1 flex justify-end">
+                <button onclick="generateBulkPlayers()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-lime-400 font-semibold rounded-md border border-slate-700 text-xs">
+                  Generate & Append Players
+                </button>
+              </div>
+            </div>
+          </details>
+
+          <!-- Player List with Scroll -->
+          <div id="playerRosterList" class="max-h-60 overflow-y-auto space-y-1.5 pr-1 custom-scrollbar">
+            <!-- Dynamically populated roster rows -->
+          </div>
+
+          <div class="mt-3 pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
+            <div class="flex gap-3">
+              <span>Beginners: <strong id="rosterBegCount" class="text-emerald-400">0</strong></span>
+              <span>Intermediates: <strong id="rosterIntCount" class="text-teal-400">0</strong></span>
+            </div>
+            <button onclick="clearAllPlayers()" class="text-slate-500 hover:text-rose-400 text-[11px] transition">Clear Roster</button>
+          </div>
+        </div>
+
+        <!-- 3. Player Stats & Wait-Time Leaderboard -->
+        <div class="bg-slate-950/70 border border-slate-800/90 rounded-2xl p-5 shadow-xl">
+          <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-800">
+            <h2 class="text-sm font-bold text-white flex items-center gap-2">
+              <i data-lucide="bar-chart-2" class="w-4 h-4 text-lime-400"></i> Participation & Fair Play Table
+            </h2>
+            <span class="text-[11px] text-slate-400">Tracks Bench Equality</span>
+          </div>
+
+          <div class="overflow-x-auto max-h-52 custom-scrollbar">
+            <table class="w-full text-left text-xs">
+              <thead class="text-[10px] uppercase tracking-wider text-slate-400 border-b border-slate-800 sticky top-0 bg-slate-950">
+                <tr>
+                  <th class="py-1.5 px-2">Player</th>
+                  <th class="py-1.5 px-2">Level</th>
+                  <th class="py-1.5 px-2 text-center" title="Games Played">Played</th>
+                  <th class="py-1.5 px-2 text-center" title="Rounds on bench">Benched</th>
+                  <th class="py-1.5 px-2 text-center" title="Consecutive bench streak">Streak</th>
+                  <th class="py-1.5 px-2 text-center" title="Win/Loss Record">W / L</th>
+                </tr>
+              </thead>
+              <tbody id="playerStatsTableBody" class="divide-y divide-slate-800/60 font-medium">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT COLUMN: Active Session, Courts & Bench (7 cols on lg) -->
+      <div class="lg:col-span-7 space-y-6">
+
+        <!-- Round Control Center Banner -->
+        <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border border-slate-800 rounded-2xl p-5 shadow-2xl relative overflow-hidden">
+          <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-lime-500/5 rounded-full blur-2xl pointer-events-none"></div>
+
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <span class="text-[11px] uppercase tracking-wider font-extrabold text-lime-400">Match Orchestrator</span>
+              <h2 class="text-xl font-black text-white flex items-center gap-2">
+                Round <span id="roundNumberHeader">0</span>
+                <span id="roundStatusBadge" class="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 font-semibold border border-slate-700">Not Started</span>
+              </h2>
+              <p id="roundSummarySubtext" class="text-xs text-slate-400 mt-0.5">
+                Configure players and click generate to roll the next fair rotation.
+              </p>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button id="generateRoundBtn" onclick="generateNextRound()" class="px-5 py-2.5 bg-gradient-to-r from-lime-400 to-emerald-500 hover:from-lime-300 hover:to-emerald-400 text-slate-950 font-black rounded-xl text-sm shadow-lg shadow-lime-500/25 flex items-center gap-2 transition-all transform active:scale-95">
+                <i data-lucide="play" class="w-4 h-4 fill-slate-950"></i>
+                <span>Generate Next Round</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- The Bench / Resting Area (Crucial to visually emphasize waiting queue) -->
+        <div class="bg-slate-950/70 border border-slate-800/90 rounded-2xl p-5 shadow-xl">
+          <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-800">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shadow-inner">
+                <span class="text-base animate-bench-sip select-none">🧃</span>
+              </div>
+              <div>
+                <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                  The Bench (Hydration & Rest)
+                  <span id="benchBadgeCount" class="text-xs bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.2 rounded-full flex items-center gap-1">
+                    <span class="animate-pulse">●</span> 0 Resting
+                  </span>
+                </h3>
+              </div>
+            </div>
+            <span class="text-[11px] text-slate-400 flex items-center gap-1">
+              <span class="animate-bench-sip">🧘</span> Automatic top-priority next round
+            </span>
+          </div>
+
+          <div id="benchContainer" class="flex flex-wrap gap-2.5 min-h-[50px] items-center">
+            <span class="text-xs text-slate-500 italic py-2">No players are currently resting on the bench.</span>
+          </div>
+        </div>
+
+        <!-- Active Courts Display Grid -->
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+              <i data-lucide="layout-grid" class="w-4 h-4 text-emerald-400"></i> Active Courts
+            </h3>
+            <div class="text-xs text-slate-400 flex items-center gap-3">
+              <span class="flex items-center gap-1"><span class="animate-leaf-sway">🌱</span> Beginner</span>
+              <span class="flex items-center gap-1"><span class="animate-energy-pulse">⚡</span> Intermediate</span>
+            </div>
+          </div>
+
+          <div id="courtsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Empty state placeholder -->
+            <div class="col-span-full py-12 px-4 border-2 border-dashed border-slate-800 rounded-2xl text-center bg-slate-950/30">
+              <i data-lucide="shield-alert" class="w-10 h-10 mx-auto text-slate-600 mb-3"></i>
+              <h4 class="text-slate-300 font-semibold text-sm">No Active Round in Progress</h4>
+              <p class="text-xs text-slate-500 max-w-sm mx-auto mt-1">
+                Set up your players and courts on the left, then click <strong>"Generate Next Round"</strong> to create balanced court pairings.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- History Log Drawer -->
+        <div class="bg-slate-950/70 border border-slate-800/90 rounded-2xl p-5 shadow-xl">
+          <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-800">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2">
+              <i data-lucide="history" class="w-4 h-4 text-slate-400"></i> Match History & Prior Rounds
+            </h3>
+            <span id="historyRoundsCount" class="text-xs text-slate-400">0 rounds recorded</span>
+          </div>
+          <div id="historyContainer" class="space-y-3 max-h-60 overflow-y-auto custom-scrollbar pr-1">
+            <p class="text-xs text-slate-500 italic py-1">No completed rounds yet.</p>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-slate-800 bg-slate-950/60 mt-auto py-4 text-center text-xs text-slate-500 flex items-center justify-center gap-1.5">
+    <span>pIIEEckleball</span> &bull; <span>Skill-Balanced Court Rotations & Bench Minimizer</span> &bull; <span class="animate-pickle-bounce">🥒</span>
+  </footer>
+
+  <!-- Application Logic -->
+  <script>
+    /* ----------------------------------------------------
+       State Management
+       ---------------------------------------------------- */
+    let state = {
+      courtsCount: 2,
+      format: 'doubles', // 'doubles' (4) or 'singles' (2)
+      matchMode: 'segregated', // 'segregated', 'mixed', 'open'
+      currentRound: 0,
+      players: [],
+      activeMatches: [], // [{ courtNumber, mode, teamA: [pIds], teamB: [pIds], scoreA: null, scoreB: null, finished: false }]
+      currentBench: [],  // [pIds]
+      roundHistory: []   // [{ roundNumber, mode, matches: [...], bench: [...] }]
+    };
+
+    let nextPlayerId = 1;
+
+    /* ----------------------------------------------------
+       Initialization & Presets
+       ---------------------------------------------------- */
+    window.addEventListener('DOMContentLoaded', () => {
+      // Load standard default preset: 12 players, 2 courts, segregated
+      loadPreset(12, 6, 2, 'segregated');
+      setupEventListeners();
+      renderAll();
+    });
+
+    function setupEventListeners() {
+      // Court inputs
+      const courtInput = document.getElementById('courtCountInput');
+      courtInput.addEventListener('change', (e) => {
+        let val = parseInt(e.target.value) || 1;
+        state.courtsCount = Math.max(1, Math.min(12, val));
+        e.target.value = state.courtsCount;
+        updateStatsBar();
+      });
+
+      // Format Selector
+      document.getElementById('formatSelector').addEventListener('change', (e) => {
+        state.format = e.target.value;
+        showNotice(`Format updated to ${state.format.toUpperCase()} (${state.format === 'doubles' ? '4 players/court' : '2 players/court'}).`, 'info');
+        updateStatsBar();
+      });
+
+      // Mode Radios
+      document.querySelectorAll("input[name='matchMode']").forEach(radio => {
+        radio.addEventListener('change', (e) => {
+          state.matchMode = e.target.value;
+          showNotice(`Matchmaking mode switched to: ${getModeLabel(state.matchMode)}.`, 'info');
+        });
+      });
+
+      // Reset
+      document.getElementById('resetSessionBtn').addEventListener('click', () => {
+        resetFullSession();
+      });
+
+      // Enter key for new player input
+      document.getElementById('newPlayerName').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          addNewPlayerFromInput();
+        }
+      });
+    }
+
+    function adjustCourtCount(delta) {
+      state.courtsCount = Math.max(1, Math.min(12, state.courtsCount + delta));
+      document.getElementById('courtCountInput').value = state.courtsCount;
+      updateStatsBar();
+    }
+
+    function loadPreset(total, beginnerCount, courts, mode) {
+      state.players = [];
+      nextPlayerId = 1;
+      state.currentRound = 0;
+      state.activeMatches = [];
+      state.currentBench = [];
+      state.roundHistory = [];
+      state.courtsCount = courts;
+      state.matchMode = mode;
+      state.format = 'doubles';
+
+      document.getElementById('courtCountInput').value = courts;
+      document.getElementById('formatSelector').value = 'doubles';
+      
+      const radio = document.querySelector(`input[name='matchMode'][value='${mode}']`);
+      if (radio) radio.checked = true;
+
+      const firstNames = [
+        "Alex", "Jordan", "Taylor", "Morgan", "Sam", "Chris", "Pat", "Riley",
+        "Casey", "Jamie", "Avery", "Dakota", "Reese", "Quinn", "Skyler", "Cameron"
+      ];
+
+      for (let i = 0; i < total; i++) {
+        const skill = (i < beginnerCount) ? 'beginner' : 'intermediate';
+        const name = (i < firstNames.length) ? firstNames[i] : `Player ${i + 1}`;
+        state.players.push({
+          id: nextPlayerId++,
+          name: name,
+          skill: skill,
+          gamesPlayed: 0,
+          gamesBenched: 0,
+          consecutiveBench: 0,
+          wins: 0,
+          losses: 0,
+          active: true // can be toggled if someone leaves
+        });
+      }
+
+      showNotice(`Loaded preset: ${total} players (${beginnerCount} Beg, ${total - beginnerCount} Int) on ${courts} courts.`, 'success');
+      renderAll();
+    }
+
+    /* ----------------------------------------------------
+       Player Management
+       ---------------------------------------------------- */
+    function addNewPlayerFromInput() {
+      const nameInput = document.getElementById('newPlayerName');
+      const skillSelect = document.getElementById('newPlayerSkill');
+      const name = nameInput.value.trim();
+
+      if (!name) {
+        showNotice("Please enter a player name.", "error");
+        return;
+      }
+
+      state.players.push({
+        id: nextPlayerId++,
+        name: name,
+        skill: skillSelect.value,
+        gamesPlayed: 0,
+        gamesBenched: 0,
+        consecutiveBench: 0,
+        wins: 0,
+        losses: 0,
+        active: true
+      });
+
+      nameInput.value = "";
+      showNotice(`Added player "${name}" (${skillSelect.value}).`, "success");
+      renderAll();
+    }
+
+    function generateBulkPlayers() {
+      const begCount = parseInt(document.getElementById('bulkBegCount').value) || 0;
+      const intCount = parseInt(document.getElementById('bulkIntCount').value) || 0;
+
+      if (begCount <= 0 && intCount <= 0) {
+        showNotice("Enter valid counts for beginners or intermediates.", "error");
+        return;
+      }
+
+      for (let i = 0; i < begCount; i++) {
+        state.players.push({
+          id: nextPlayerId++,
+          name: `Beg #${nextPlayerId - 1}`,
+          skill: 'beginner',
+          gamesPlayed: 0,
+          gamesBenched: 0,
+          consecutiveBench: 0,
+          wins: 0,
+          losses: 0,
+          active: true
+        });
+      }
+
+      for (let i = 0; i < intCount; i++) {
+        state.players.push({
+          id: nextPlayerId++,
+          name: `Int #${nextPlayerId - 1}`,
+          skill: 'intermediate',
+          gamesPlayed: 0,
+          gamesBenched: 0,
+          consecutiveBench: 0,
+          wins: 0,
+          losses: 0,
+          active: true
+        });
+      }
+
+      showNotice(`Added ${begCount} Beginners and ${intCount} Intermediates.`, "success");
+      renderAll();
+    }
+
+    function togglePlayerSkill(id) {
+      const p = state.players.find(x => x.id === id);
+      if (p) {
+        p.skill = p.skill === 'beginner' ? 'intermediate' : 'beginner';
+        renderAll();
+      }
+    }
+
+    function removePlayer(id) {
+      const p = state.players.find(x => x.id === id);
+      const name = p ? p.name : 'Player';
+      state.players = state.players.filter(x => x.id !== id);
+      // Clean bench/matches if in active list
+      state.currentBench = state.currentBench.filter(x => x !== id);
+      showNotice(`Removed ${name} from roster.`, "info");
+      renderAll();
+    }
+
+    function bulkSetAllSkill(skill) {
+      state.players.forEach(p => p.skill = skill);
+      showNotice(`All players set to ${skill.toUpperCase()}.`, "info");
+      renderAll();
+    }
+
+    function clearAllPlayers() {
+      state.players = [];
+      state.currentBench = [];
+      state.activeMatches = [];
+      state.currentRound = 0;
+      showNotice("Roster cleared.", "info");
+      renderAll();
+    }
+
+    /* ----------------------------------------------------
+       Fair Rotation & Matchmaking Algorithm
+       ---------------------------------------------------- */
+    function generateNextRound() {
+      const activePlayers = state.players.filter(p => p.active);
+      const playersPerCourt = state.format === 'doubles' ? 4 : 2;
+      const totalCourtCapacity = state.courtsCount * playersPerCourt;
+
+      if (activePlayers.length < playersPerCourt) {
+        showNotice(`Need at least ${playersPerCourt} active players to generate a game on 1 court.`, 'error');
+        return;
+      }
+
+      // 1. Calculate how many courts can be filled
+      const courtsToUse = Math.min(state.courtsCount, Math.floor(activePlayers.length / playersPerCourt));
+      const playingSlots = courtsToUse * playersPerCourt;
+      const benchedSlots = activePlayers.length - playingSlots;
+
+      // 2. Bench selection priority scoring (The Fair Anti-Bench Formula)
+      // High score = Priority to play this round
+      // Factor 1: Consecutive bench rounds (MUST play if sat out previously!)
+      // Factor 2: Total games played (lowest plays first)
+      // Factor 3: Total benched (highest gets priority)
+      // Factor 4: Slight random jitter to break ties fairly
+      function getPlayPriority(player) {
+        let score = 0;
+        score += player.consecutiveBench * 1000; // Urgent priority
+        score -= player.gamesPlayed * 50;        // Favor those who played least
+        score += player.gamesBenched * 10;       // Favor those with more historical wait
+        score += Math.random() * 5;              // Randomize exact ties
+        return score;
+      }
+
+      // Group players by skill
+      const beginners = activePlayers.filter(p => p.skill === 'beginner');
+      const intermediates = activePlayers.filter(p => p.skill === 'intermediate');
+
+      let courtAllocations = []; // Array of arrays of 4 or 2 players
+      let chosenPlayers = [];
+      let restingPlayers = [];
+
+      if (state.matchMode === 'segregated') {
+        // SEGREGATED MODE:
+        // Try to create pure Beginner courts and pure Intermediate courts
+        // Calculate how many courts each group ideally gets based on population
+        courtAllocations = allocateSegregatedCourts(beginners, intermediates, courtsToUse, playersPerCourt, getPlayPriority);
+      } else if (state.matchMode === 'mixed') {
+        // BALANCED MIXED PAIRS:
+        // Each court gets 2 Beginners and 2 Intermediates (in doubles: Partner = 1 Beg + 1 Int vs 1 Beg + 1 Int)
+        courtAllocations = allocateMixedPairsCourts(beginners, intermediates, courtsToUse, playersPerCourt, getPlayPriority);
+      } else {
+        // OPEN SOCIAL:
+        // Purely rank by wait time/fair rotation regardless of skill
+        const sortedAll = [...activePlayers].sort((a, b) => getPlayPriority(b) - getPlayPriority(a));
+        const selected = sortedAll.slice(0, playingSlots);
+        restingPlayers = sortedAll.slice(playingSlots);
+
+        // Shuffle selected lightly to form varied courts
+        const shuffled = shuffleArray(selected);
+        for (let c = 0; c < courtsToUse; c++) {
+          courtAllocations.push({
+            type: 'open',
+            players: shuffled.slice(c * playersPerCourt, (c + 1) * playersPerCourt)
+          });
+        }
+      }
+
+      // Collect all assigned player IDs
+      const assignedIds = new Set();
+      courtAllocations.forEach(c => c.players.forEach(p => assignedIds.add(p.id)));
+
+      // Players not in courts go to the bench
+      restingPlayers = activePlayers.filter(p => !assignedIds.has(p.id));
+
+      // 3. Update player lifetime stats for this round
+      activePlayers.forEach(p => {
+        if (assignedIds.has(p.id)) {
+          p.gamesPlayed += 1;
+          p.consecutiveBench = 0;
+        } else {
+          p.gamesBenched += 1;
+          p.consecutiveBench += 1;
+        }
+      });
+
+      // 4. Create active match objects
+      state.currentRound += 1;
+      state.currentBench = restingPlayers.map(p => p.id);
+      state.activeMatches = [];
+
+      courtAllocations.forEach((court, idx) => {
+        let teamA = [];
+        let teamB = [];
+
+        if (state.format === 'doubles') {
+          if (court.type === 'mixed-balanced' && court.players.length === 4) {
+            // Mixed balanced doubles: Team A = 1 Beg + 1 Int, Team B = 1 Beg + 1 Int
+            const begs = court.players.filter(p => p.skill === 'beginner');
+            const ints = court.players.filter(p => p.skill === 'intermediate');
+            if (begs.length >= 2 && ints.length >= 2) {
+              teamA = [begs[0].id, ints[0].id];
+              teamB = [begs[1].id, ints[1].id];
+            } else {
+              teamA = [court.players[0].id, court.players[1].id];
+              teamB = [court.players[2].id, court.players[3].id];
+            }
+          } else {
+            // Standard division
+            teamA = [court.players[0].id, court.players[1].id];
+            teamB = [court.players[2].id, court.players[3].id];
+          }
+        } else {
+          // Singles
+          teamA = [court.players[0].id];
+          teamB = [court.players[1].id];
+        }
+
+        state.activeMatches.push({
+          courtNumber: idx + 1,
+          modeLabel: court.label || getModeLabel(state.matchMode),
+          courtType: court.type,
+          teamA: teamA,
+          teamB: teamB,
+          scoreA: 0,
+          scoreB: 0,
+          finished: false
+        });
+      });
+
+      // Archive into round history
+      state.roundHistory.unshift({
+        roundNumber: state.currentRound,
+        mode: state.matchMode,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        matches: JSON.parse(JSON.stringify(state.activeMatches)),
+        bench: [...state.currentBench]
+      });
+
+      showNotice(`Round ${state.currentRound} generated! ${assignedIds.size} players playing across ${courtAllocations.length} courts. ${restingPlayers.length} on bench.`, 'success');
+      renderAll();
+    }
+
+    /* Helper: Segregated Court Allocator */
+    function allocateSegregatedCourts(beginners, intermediates, courtsToUse, playersPerCourt, priorityFn) {
+      const allocations = [];
+      const sortedBeg = [...beginners].sort((a, b) => priorityFn(b) - priorityFn(a));
+      const sortedInt = [...intermediates].sort((a, b) => priorityFn(b) - priorityFn(a));
+
+      let begFullCourts = Math.floor(sortedBeg.length / playersPerCourt);
+      let intFullCourts = Math.floor(sortedInt.length / playersPerCourt);
+
+      let courtsAssigned = 0;
+      let begIdx = 0;
+      let intIdx = 0;
+
+      // Distribute available courts proportionally
+      while (courtsAssigned < courtsToUse) {
+        let added = false;
+
+        // Try giving a court to Beginner if they have enough and haven't exceeded share
+        if (begFullCourts > 0 && (courtsAssigned < courtsToUse)) {
+          allocations.push({
+            type: 'segregated-beg',
+            label: 'Beginners Court',
+            players: sortedBeg.slice(begIdx, begIdx + playersPerCourt)
+          });
+          begIdx += playersPerCourt;
+          begFullCourts--;
+          courtsAssigned++;
+          added = true;
+        }
+
+        // Try giving a court to Intermediate
+        if (intFullCourts > 0 && (courtsAssigned < courtsToUse)) {
+          allocations.push({
+            type: 'segregated-int',
+            label: 'Intermediates Court',
+            players: sortedInt.slice(intIdx, intIdx + playersPerCourt)
+          });
+          intIdx += playersPerCourt;
+          intFullCourts--;
+          courtsAssigned++;
+          added = true;
+        }
+
+        // If neither can form a pure full court, pool remaining highest priority players into a mixed court
+        if (!added && courtsAssigned < courtsToUse) {
+          const remainingBeg = sortedBeg.slice(begIdx);
+          const remainingInt = sortedInt.slice(intIdx);
+          const pool = [...remainingBeg, ...remainingInt].sort((a, b) => priorityFn(b) - priorityFn(a));
+
+          if (pool.length >= playersPerCourt) {
+            allocations.push({
+              type: 'mixed-overflow',
+              label: 'Mixed Tier Overflow',
+              players: pool.slice(0, playersPerCourt)
+            });
+            courtsAssigned++;
+          }
+          break;
+        }
+      }
+
+      return allocations;
+    }
+
+    /* Helper: Mixed Balanced Court Allocator (Doubles: 2 Beg + 2 Int per court) */
+    function allocateMixedPairsCourts(beginners, intermediates, courtsToUse, playersPerCourt, priorityFn) {
+      const allocations = [];
+      const sortedBeg = [...beginners].sort((a, b) => priorityFn(b) - priorityFn(a));
+      const sortedInt = [...intermediates].sort((a, b) => priorityFn(b) - priorityFn(a));
+
+      let begIdx = 0;
+      let intIdx = 0;
+
+      for (let c = 0; c < courtsToUse; c++) {
+        if (playersPerCourt === 4) {
+          // Doubles: Need 2 Beginners + 2 Intermediates
+          if (sortedBeg.length - begIdx >= 2 && sortedInt.length - intIdx >= 2) {
+            const bPair = sortedBeg.slice(begIdx, begIdx + 2);
+            const iPair = sortedInt.slice(intIdx, intIdx + 2);
+            begIdx += 2;
+            intIdx += 2;
+            allocations.push({
+              type: 'mixed-balanced',
+              label: 'Balanced Pairs (Beg + Int)',
+              players: [...bPair, ...iPair]
+            });
+          } else {
+            // Fallback: take whoever has highest wait time
+            const remaining = [...sortedBeg.slice(begIdx), ...sortedInt.slice(intIdx)].sort((a, b) => priorityFn(b) - priorityFn(a));
+            if (remaining.length >= 4) {
+              allocations.push({
+                type: 'mixed-social',
+                label: 'Mixed Social (Best Wait Time)',
+                players: remaining.slice(0, 4)
+              });
+              // Advance indices roughly
+              break;
+            }
+          }
+        } else {
+          // Singles: 1 Beg vs 1 Beg, or 1 Int vs 1 Int, or fair pair
+          const pool = [...sortedBeg.slice(begIdx), ...sortedInt.slice(intIdx)].sort((a, b) => priorityFn(b) - priorityFn(a));
+          if (pool.length >= 2) {
+            allocations.push({
+              type: 'mixed-singles',
+              label: 'Singles Match',
+              players: pool.slice(0, 2)
+            });
+            begIdx += 1;
+            intIdx += 1;
+          }
+        }
+      }
+
+      return allocations;
+    }
+
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    /* ----------------------------------------------------
+       Match Score & Result Recording
+       ---------------------------------------------------- */
+    function recordMatchScore(courtIndex, teamAScore, teamBScore) {
+      const match = state.activeMatches[courtIndex];
+      if (!match) return;
+
+      const sA = parseInt(teamAScore) || 0;
+      const sB = parseInt(teamBScore) || 0;
+      match.scoreA = sA;
+      match.scoreB = sB;
+
+      // If scores differ, we can determine winner
+      if (sA !== sB) {
+        match.finished = true;
+        const winnerTeam = sA > sB ? match.teamA : match.teamB;
+        const loserTeam = sA > sB ? match.teamB : match.teamA;
+
+        winnerTeam.forEach(pId => {
+          const p = state.players.find(x => x.id === pId);
+          if (p) p.wins = (p.wins || 0) + 1;
+        });
+
+        loserTeam.forEach(pId => {
+          const p = state.players.find(x => x.id === pId);
+          if (p) p.losses = (p.losses || 0) + 1;
+        });
+
+        showNotice(`Court ${match.courtNumber} finished! Score: ${sA} - ${sB}. Stats updated.`, 'success');
+      } else {
+        match.finished = false;
+      }
+
+      renderAll();
+    }
+
+    function toggleMatchFinished(courtIndex) {
+      const match = state.activeMatches[courtIndex];
+      if (!match) return;
+      match.finished = !match.finished;
+      renderAll();
+    }
+
+    /* ----------------------------------------------------
+       UI Rendering Functions
+       ---------------------------------------------------- */
+    function renderAll() {
+      renderRoster();
+      renderBench();
+      renderCourts();
+      renderStatsTable();
+      renderHistory();
+      updateHeaderAndBadges();
+      updateStatsBar();
+
+      // Refresh lucide icons dynamically rendered
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+    }
+
+    function updateHeaderAndBadges() {
+      document.getElementById('currentRoundDisplay').textContent = state.currentRound;
+      document.getElementById('roundNumberHeader').textContent = state.currentRound;
+
+      const statusBadge = document.getElementById('roundStatusBadge');
+      if (state.currentRound === 0) {
+        statusBadge.textContent = 'Not Started';
+        statusBadge.className = 'text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 font-semibold border border-slate-700';
+      } else {
+        statusBadge.textContent = 'In Progress';
+        statusBadge.className = 'text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-semibold border border-emerald-500/30';
+      }
+
+      const activePlayingCount = state.activeMatches.reduce((acc, m) => acc + m.teamA.length + m.teamB.length, 0);
+      document.getElementById('roundSummarySubtext').textContent = state.currentRound === 0
+        ? 'Setup your roster, select courts & skill policy, then start Round 1.'
+        : `${activePlayingCount} active players on ${state.activeMatches.length} courts. Next round will advance benched players first.`;
+    }
+
+    function updateStatsBar() {
+      const activePlayers = state.players.filter(p => p.active);
+      const playingCount = state.activeMatches.reduce((acc, m) => acc + m.teamA.length + m.teamB.length, 0);
+      const benchedCount = state.currentBench.length;
+
+      document.getElementById('statTotalCount').textContent = activePlayers.length;
+      document.getElementById('statPlayingCount').textContent = playingCount;
+      document.getElementById('statBenchedCount').textContent = benchedCount;
+    }
+
+    function renderRoster() {
+      const listEl = document.getElementById('playerRosterList');
+      listEl.innerHTML = '';
+
+      let begCount = 0;
+      let intCount = 0;
+
+      document.getElementById('playerBadgeCount').textContent = `${state.players.length} players`;
+
+      if (state.players.length === 0) {
+        listEl.innerHTML = `<div class="text-center py-6 text-xs text-slate-500 italic">No players in roster. Add above or use presets.</div>`;
+        document.getElementById('rosterBegCount').textContent = '0';
+        document.getElementById('rosterIntCount').textContent = '0';
+        return;
+      }
+
+      state.players.forEach(p => {
+        const isBeg = p.skill === 'beginner';
+        if (isBeg) begCount++;
+        else intCount++;
+
+        const isBenched = state.currentBench.includes(p.id);
+        const isPlaying = state.activeMatches.some(m => m.teamA.includes(p.id) || m.teamB.includes(p.id));
+
+        const row = document.createElement('div');
+        row.className = "flex items-center justify-between p-2 rounded-lg bg-slate-900 border border-slate-800/80 hover:border-slate-700 text-xs transition";
+
+        row.innerHTML = `
+          <div class="flex items-center gap-2 min-w-0">
+            <span class="${isBeg ? 'animate-leaf-sway' : 'animate-energy-pulse'} select-none">${isBeg ? '🌱' : '⚡'}</span>
+            <span class="font-medium text-slate-200 truncate max-w-[130px] sm:max-w-[180px]">${escapeHtml(p.name)}</span>
+            ${isPlaying ? '<span class="text-[9px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.2 rounded border border-emerald-500/20 font-semibold flex items-center gap-0.5"><span class="animate-pickle-bounce text-[10px]">🏓</span> Court</span>' : ''}
+            ${isBenched ? '<span class="text-[9px] bg-amber-500/10 text-amber-400 px-1.5 py-0.2 rounded border border-amber-500/20 font-semibold flex items-center gap-0.5"><span class="animate-bench-sip text-[10px]">🧃</span> Bench</span>' : ''}
+          </div>
+          <div class="flex items-center gap-1.5">
+            <button onclick="togglePlayerSkill(${p.id})" title="Click to toggle skill" class="px-2 py-0.5 rounded text-[10px] font-bold tracking-wide uppercase transition flex items-center gap-1 ${isBeg ? 'bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 border border-emerald-500/30' : 'bg-teal-500/20 text-teal-300 hover:bg-teal-500/30 border border-teal-500/30'}">
+              <span>${isBeg ? '🌱 BEG' : '⚡ INT'}</span>
+            </button>
+            <button onclick="removePlayer(${p.id})" title="Remove player" class="p-1 text-slate-500 hover:text-rose-400 transition">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        `;
+        listEl.appendChild(row);
+      });
+
+      document.getElementById('rosterBegCount').textContent = begCount;
+      document.getElementById('rosterIntCount').textContent = intCount;
+    }
+
+    function renderBench() {
+      const container = document.getElementById('benchContainer');
+      container.innerHTML = '';
+
+      document.getElementById('benchBadgeCount').innerHTML = `<span class="animate-pulse">●</span> ${state.currentBench.length} Resting`;
+
+      if (state.currentBench.length === 0) {
+        container.innerHTML = `
+          <div class="flex items-center gap-2 text-xs text-slate-400 py-2">
+            <span class="text-sm">✨</span>
+            <span>Zero wait time! Everyone is active on court.</span>
+          </div>`;
+        return;
+      }
+
+      state.currentBench.forEach(pId => {
+        const p = state.players.find(x => x.id === pId);
+        if (!p) return;
+
+        const isCriticalWait = p.consecutiveBench >= 2;
+        const isBeg = p.skill === 'beginner';
+
+        const chip = document.createElement('div');
+        chip.className = `flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold shadow-sm transition ${
+          isCriticalWait 
+            ? 'bg-rose-950/40 border-rose-500/50 text-rose-300 animate-pulse'
+            : 'bg-amber-950/30 border-amber-500/40 text-amber-200'
+        }`;
+
+        chip.innerHTML = `
+          <div class="flex items-center gap-1.5">
+            <span class="animate-bench-sip select-none">${isCriticalWait ? '⏰' : '🧃'}</span>
+            <span class="${isBeg ? 'text-emerald-300' : 'text-teal-300'}">${isBeg ? '🌱' : '⚡'} ${escapeHtml(p.name)}</span>
+          </div>
+          <span class="text-[10px] px-1.5 py-0.5 rounded ${isCriticalWait ? 'bg-rose-900/60 text-rose-200' : 'bg-amber-900/60 text-amber-200'}">
+            Sat: ${p.consecutiveBench} rnd${p.consecutiveBench > 1 ? 's' : ''}
+          </span>
+        `;
+        container.appendChild(chip);
+      });
+    }
+
+    function renderCourts() {
+      const grid = document.getElementById('courtsGrid');
+      grid.innerHTML = '';
+
+      if (state.activeMatches.length === 0) {
+        grid.innerHTML = `
+          <div class="col-span-full py-12 px-4 border-2 border-dashed border-slate-800 rounded-2xl text-center bg-slate-950/30">
+            <span class="text-4xl animate-pickle-bounce block mb-2 select-none">🏓</span>
+            <h4 class="text-slate-300 font-semibold text-sm">No Active Round in Progress</h4>
+            <p class="text-xs text-slate-500 max-w-sm mx-auto mt-1">
+              Configure your players and courts, then click <strong>"Generate Next Round"</strong> to start matching!
+            </p>
+          </div>
+        `;
+        return;
+      }
+
+      state.activeMatches.forEach((match, idx) => {
+        const courtCard = document.createElement('div');
+        courtCard.className = `bg-slate-950/90 border rounded-2xl p-4 shadow-xl transition relative overflow-hidden flex flex-col justify-between ${
+          match.finished ? 'border-emerald-500/50 ring-1 ring-emerald-500/20' : 'border-slate-800'
+        }`;
+
+        // Header badge icon
+        const badgeColor = match.courtType.includes('beg') 
+          ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' 
+          : (match.courtType.includes('int') 
+              ? 'bg-teal-500/10 text-teal-400 border-teal-500/30' 
+              : 'bg-lime-500/10 text-lime-400 border-lime-500/30');
+
+        const modeIcon = match.courtType.includes('beg') 
+          ? '<span class="animate-leaf-sway mr-1">🌱</span>' 
+          : (match.courtType.includes('int') 
+              ? '<span class="animate-energy-pulse mr-1">⚡</span>' 
+              : '<span class="animate-pickle-bounce mr-1">🥒</span>');
+
+        courtCard.innerHTML = `
+          <!-- Top Court Ribbon -->
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <div class="flex items-center gap-2">
+              <span class="w-7 h-7 rounded-lg bg-lime-400 text-slate-950 font-black text-xs flex items-center justify-center shadow">
+                C${match.courtNumber}
+              </span>
+              <h4 class="font-bold text-white text-sm flex items-center gap-1.5">
+                <span>Court ${match.courtNumber}</span>
+                <span class="text-xs animate-pickle-bounce select-none">🎾</span>
+              </h4>
+            </div>
+            <span class="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full border ${badgeColor} flex items-center">
+              ${modeIcon} ${match.modeLabel}
+            </span>
+          </div>
+
+          <!-- Pickleball Net Visual Graphic & Matchup -->
+          <div class="my-4 space-y-3">
+            
+            <!-- Team 1 -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5">
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between mb-1">
+                <span>Team 1</span>
+                <span class="text-xs">🟦</span>
+              </span>
+              <div class="space-y-1">
+                ${match.teamA.map(id => renderPlayerBadge(id)).join('')}
+              </div>
+            </div>
+
+            <!-- Net / VS Divider -->
+            <div class="relative flex items-center justify-center py-1">
+              <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-dashed border-slate-700"></div></div>
+              <span class="relative px-3 py-0.5 rounded-full bg-slate-800 text-[10px] font-black text-lime-400 uppercase tracking-widest border border-slate-700 animate-net-pulse flex items-center gap-1">
+                <span class="text-[10px]">🏓</span> NET <span class="text-[10px]">🏓</span>
+              </span>
+            </div>
+
+            <!-- Team 2 -->
+            <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5">
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between mb-1">
+                <span>Team 2</span>
+                <span class="text-xs">🟧</span>
+              </span>
+              <div class="space-y-1">
+                ${match.teamB.map(id => renderPlayerBadge(id)).join('')}
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Score & Completion Toggle -->
+          <div class="pt-3 border-t border-slate-800 flex items-center justify-between gap-2 mt-auto">
+            <div class="flex items-center gap-1.5 text-xs">
+              <span class="text-slate-400 text-[11px]">Score:</span>
+              <input type="number" min="0" max="30" value="${match.scoreA !== null ? match.scoreA : ''}" placeholder="T1" id="scoreA_${idx}" class="w-12 h-7 bg-slate-900 border border-slate-700 rounded text-center text-xs text-white font-bold focus:outline-none focus:border-lime-500">
+              <span class="text-slate-500 font-bold">:</span>
+              <input type="number" min="0" max="30" value="${match.scoreB !== null ? match.scoreB : ''}" placeholder="T2" id="scoreB_${idx}" class="w-12 h-7 bg-slate-900 border border-slate-700 rounded text-center text-xs text-white font-bold focus:outline-none focus:border-lime-500">
+              <button onclick="saveScoreForCourt(${idx})" class="h-7 px-2 bg-slate-800 hover:bg-slate-700 text-lime-400 rounded text-[11px] font-semibold border border-slate-700 transition flex items-center gap-1" title="Save Score & Update Win/Loss">
+                <span>Save</span>
+              </button>
+            </div>
+
+            <button onclick="toggleMatchFinished(${idx})" class="text-xs px-2.5 py-1 rounded-lg font-semibold transition flex items-center gap-1 ${
+              match.finished 
+                ? 'bg-emerald-500 text-slate-950 font-bold shadow-md shadow-emerald-500/20' 
+                : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700'
+            }">
+              <span>${match.finished ? '🏆 Final' : '⏳ Playing'}</span>
+            </button>
+          </div>
+        `;
+
+        grid.appendChild(courtCard);
+      });
+    }
+
+    function renderPlayerBadge(id) {
+      const p = state.players.find(x => x.id === id);
+      if (!p) return '<div class="text-xs text-slate-500">Unknown</div>';
+
+      const isBeg = p.skill === 'beginner';
+      return `
+        <div class="flex items-center justify-between text-xs py-1 px-2 rounded-lg bg-slate-950/60 border border-slate-800">
+          <span class="font-semibold text-slate-200 truncate flex items-center gap-1.5">
+            <span class="${isBeg ? 'animate-leaf-sway' : 'animate-energy-pulse'} select-none">${isBeg ? '🌱' : '⚡'}</span>
+            <span>${escapeHtml(p.name)}</span>
+          </span>
+          <span class="text-[10px] font-bold px-1.5 py-0.2 rounded ${isBeg ? 'bg-emerald-500/20 text-emerald-300' : 'bg-teal-500/20 text-teal-300'}">
+            ${isBeg ? 'Beginner' : 'Intermediate'}
+          </span>
+        </div>
+      `;
+    }
+
+    function saveScoreForCourt(courtIdx) {
+      const inputA = document.getElementById(`scoreA_${courtIdx}`);
+      const inputB = document.getElementById(`scoreB_${courtIdx}`);
+      recordMatchScore(courtIdx, inputA.value, inputB.value);
+    }
+
+    function renderStatsTable() {
+      const tbody = document.getElementById('playerStatsTableBody');
+      tbody.innerHTML = '';
+
+      if (state.players.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-xs text-slate-500">No player data.</td></tr>`;
+        return;
+      }
+
+      const sorted = [...state.players].sort((a, b) => {
+        if (a.gamesPlayed !== b.gamesPlayed) return a.gamesPlayed - b.gamesPlayed;
+        return b.consecutiveBench - a.consecutiveBench;
+      });
+
+      sorted.forEach(p => {
+        const isBenched = state.currentBench.includes(p.id);
+        const isBeg = p.skill === 'beginner';
+        const tr = document.createElement('tr');
+        tr.className = `hover:bg-slate-900/60 transition ${isBenched ? 'bg-amber-950/10' : ''}`;
+
+        tr.innerHTML = `
+          <td class="py-2 px-2 font-semibold text-slate-200 truncate max-w-[120px]">
+            <span class="mr-1 ${isBeg ? 'animate-leaf-sway' : 'animate-energy-pulse'} select-none">${isBeg ? '🌱' : '⚡'}</span>
+            ${escapeHtml(p.name)}
+          </td>
+          <td class="py-2 px-2">
+            <span class="text-[10px] px-1.5 py-0.5 rounded font-bold ${isBeg ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-teal-500/10 text-teal-400 border border-teal-500/20'}">
+              ${isBeg ? 'BEG' : 'INT'}
+            </span>
+          </td>
+          <td class="py-2 px-2 text-center font-bold text-slate-100">${p.gamesPlayed}</td>
+          <td class="py-2 px-2 text-center text-slate-300">${p.gamesBenched}</td>
+          <td class="py-2 px-2 text-center font-bold ${p.consecutiveBench >= 2 ? 'text-rose-400 font-extrabold flex items-center justify-center gap-0.5' : (p.consecutiveBench === 1 ? 'text-amber-400' : 'text-slate-500')}">
+            ${p.consecutiveBench >= 2 ? '<span class="animate-bounce">⚠️</span>' : ''}${p.consecutiveBench}
+          </td>
+          <td class="py-2 px-2 text-center text-[11px] text-slate-300">
+            <span class="text-emerald-400 font-semibold">${p.wins || 0}</span> / <span class="text-rose-400 font-semibold">${p.losses || 0}</span>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderHistory() {
+      const container = document.getElementById('historyContainer');
+      container.innerHTML = '';
+
+      document.getElementById('historyRoundsCount').textContent = `${state.roundHistory.length} round${state.roundHistory.length === 1 ? '' : 's'} recorded`;
+
+      if (state.roundHistory.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-500 italic py-2">No prior rounds recorded yet.</p>`;
+        return;
+      }
+
+      state.roundHistory.forEach(r => {
+        const card = document.createElement('div');
+        card.className = "p-3 rounded-xl bg-slate-900/70 border border-slate-800/80 text-xs space-y-2";
+
+        const benchNames = r.bench.map(id => {
+          const p = state.players.find(x => x.id === id);
+          return p ? p.name : 'Unknown';
+        }).join(', ') || 'None';
+
+        let matchesSummary = r.matches.map(m => {
+          const tA = m.teamA.map(id => getPlayerShortName(id)).join('+');
+          const tB = m.teamB.map(id => getPlayerShortName(id)).join('+');
+          const scoreStr = (m.scoreA !== null && m.scoreB !== null && (m.scoreA > 0 || m.scoreB > 0)) 
+            ? `(${m.scoreA}-${m.scoreB})` 
+            : '';
+          return `<span class="bg-slate-950 px-2 py-1 rounded border border-slate-800 text-[11px]"><strong>C${m.courtNumber}:</strong> ${tA} vs ${tB} <span class="text-lime-400 font-bold">${scoreStr}</span></span>`;
+        }).join(' ');
+
+        card.innerHTML = `
+          <div class="flex items-center justify-between border-b border-slate-800 pb-1.5">
+            <span class="font-bold text-white flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-lime-400"></span> Round ${r.roundNumber}
+              <span class="text-[10px] text-slate-400 font-normal">(${r.timestamp})</span>
+            </span>
+            <span class="text-[10px] uppercase font-semibold text-slate-400">${getModeLabel(r.mode)}</span>
+          </div>
+          <div class="flex flex-wrap gap-1.5 pt-1">
+            ${matchesSummary}
+          </div>
+          <div class="text-[10px] text-slate-400 pt-1 border-t border-slate-800/50 flex items-center gap-1">
+            <i data-lucide="coffee" class="w-3 h-3 text-amber-400"></i>
+            <span>Benched: <strong class="text-slate-300">${escapeHtml(benchNames)}</strong></span>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function getPlayerShortName(id) {
+      const p = state.players.find(x => x.id === id);
+      return p ? p.name.split(' ')[0] : '?';
+    }
+
+    function getModeLabel(mode) {
+      switch (mode) {
+        case 'segregated': return 'Skill Segregated';
+        case 'mixed': return 'Balanced Mixed Pairs';
+        case 'open': return 'Open Social';
+        default: return mode;
+      }
+    }
+
+    /* ----------------------------------------------------
+       Notifications & Utilities
+       ---------------------------------------------------- */
+    let noticeTimeout = null;
+
+    function showNotice(text, type = 'info') {
+      const banner = document.getElementById('noticeBanner');
+      const textEl = document.getElementById('noticeText');
+      const icon = document.getElementById('noticeIcon');
+
+      clearTimeout(noticeTimeout);
+
+      textEl.textContent = text;
+      banner.classList.remove('hidden', 'bg-emerald-950/80', 'border-emerald-500/40', 'text-emerald-200',
+        'bg-rose-950/80', 'border-rose-500/40', 'text-rose-200',
+        'bg-slate-800', 'border-slate-700', 'text-slate-200');
+
+      if (type === 'success') {
+        banner.classList.add('bg-emerald-950/80', 'border-emerald-500/40', 'text-emerald-200');
+        icon.setAttribute('data-lucide', 'check-circle-2');
+      } else if (type === 'error') {
+        banner.classList.add('bg-rose-950/80', 'border-rose-500/40', 'text-rose-200');
+        icon.setAttribute('data-lucide', 'alert-circle');
+      } else {
+        banner.classList.add('bg-slate-800', 'border-slate-700', 'text-slate-200');
+        icon.setAttribute('data-lucide', 'info');
+      }
+
+      if (window.lucide) lucide.createIcons();
+      banner.classList.remove('hidden');
+
+      noticeTimeout = setTimeout(() => {
+        banner.classList.add('hidden');
+      }, 5000);
+    }
+
+    function dismissNotice() {
+      document.getElementById('noticeBanner').classList.add('hidden');
+    }
+
+    function resetFullSession() {
+      state.currentRound = 0;
+      state.activeMatches = [];
+      state.currentBench = [];
+      state.roundHistory = [];
+      state.players.forEach(p => {
+        p.gamesPlayed = 0;
+        p.gamesBenched = 0;
+        p.consecutiveBench = 0;
+        p.wins = 0;
+        p.losses = 0;
+      });
+      showNotice("Session reset! Player stats and rounds cleared.", "info");
+      renderAll();
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+  </script>
+</body>
+</html>

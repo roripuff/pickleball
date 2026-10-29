@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>pIIEEckleball - Court Rotation & Matchmaker</title>
+
+  <!-- PWA Settings & Mobile Meta -->
+  <meta name="theme-color" content="#10b981">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="pIIEEckleball">
+
+  <!-- Embedded Web App Manifest (.json) via Data URI -->
+  <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22pIIEEckleball%20Court%20Rotation%22%2C%22short_name%22%3A%22pIIEEckleball%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23090d16%22%2C%22theme_color%22%3A%22%2310b981%22%7D">
+
+  <!-- Favicon / App Icon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏓</text></svg>">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏓</text></svg>">
+
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: #121826;
+      --card-border: #1e293b;
+      --accent: #10b981;
+      --accent-hover: #059669;
+      --beg-color: #38bdf8;
+      --int-color: #f59e0b;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --danger: #ef4444;
+      --bench-bg: #1a2234;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1100px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Animated Header */
+    header {
+      background: linear-gradient(135deg, #111827 0%, #1e293b 100%);
+      padding: 20px;
+      border-radius: 16px;
+      border: 1px solid var(--card-border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+
+    .title-box h1 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .highlight-iiee {
+      color: var(--accent);
+      text-shadow: 0 0 12px rgba(16, 185, 129, 0.4);
+    }
+
+    .title-box p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-top: 4px;
+    }
+
+    /* Keyframe Animations */
+    @keyframes bounce-paddle {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      50% { transform: translateY(-7px) rotate(-12deg); }
+    }
+
+    @keyframes spin-pickle {
+      0% { transform: rotate(0deg); }
+      50% { transform: rotate(18deg) scale(1.15); }
+      100% { transform: rotate(0deg); }
+    }
+
+    @keyframes pulse-dot {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.4); opacity: 0.6; }
+    }
+
+    @keyframes sway-leaf {
+      0%, 100% { transform: rotate(-5deg); }
+      50% { transform: rotate(10deg); }
+    }
+
+    @keyframes buzz-bolt {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2) translateY(-2px); }
+    }
+
+    .anim-paddle {
+      display: inline-block;
+      animation: bounce-paddle 1.8s ease-in-out infinite;
+    }
+
+    .anim-pickle {
+      display: inline-block;
+      animation: spin-pickle 2.4s ease-in-out infinite;
+    }
+
+    .anim-sprout {
+      display: inline-block;
+      animation: sway-leaf 2s ease-in-out infinite;
+    }
+
+    .anim-spark {
+      display: inline-block;
+      animation: buzz-bolt 1.5s ease-in-out infinite;
+    }
+
+    .pwa-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--accent);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+
+    .pwa-badge .dot {
+      width: 7px;
+      height: 7px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse-dot 1.6s infinite;
+    }
+
+    /* Layout Grids */
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 880px) {
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 14px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .card h2 {
+      font-size: 1.15rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid var(--card-border);
+      padding-bottom: 10px;
+    }
+
+    /* Forms & Controls */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input, select, button {
+      border-radius: 8px;
+      border: 1px solid var(--card-border);
+      background: #182234;
+      color: #fff;
+      padding: 10px 12px;
+      font-size: 0.95rem;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+    }
+
+    .input-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+      font-weight: 700;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-secondary {
+      background: #27354f;
+      color: var(--text);
+      cursor: pointer;
+      border: none;
+      font-weight: 600;
+    }
+
+    .btn-secondary:hover {
+      background: #334466;
+    }
+
+    .btn-outline-danger {
+      background: transparent;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #f87171;
+      font-size: 0.78rem;
+      cursor: pointer;
+      padding: 4px 8px;
+    }
+
+    .btn-outline-danger:hover {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    /* Player Roster */
+    .roster-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 280px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+
+    .player-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255,255,255,0.03);
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .tag {
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      border-radius: 20px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .tag-beg {
+      background: rgba(56, 189, 248, 0.15);
+      color: var(--beg-color);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+    }
+
+    .tag-int {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--int-color);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    /* Courts Arena Grid */
+    .round-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      background: #141c2c;
+      padding: 14px 18px;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+    }
+
+    .courts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+
+    .court-card {
+      background: #121929;
+      border: 2px solid #23314d;
+      border-radius: 12px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .court-header {
+      background: #1b263b;
+      padding: 8px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #23314d;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+
+    .court-mat {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      background: radial-gradient(circle at center, #16243d 0%, #0e1524 100%);
+    }
+
+    .doubles-team {
+      background: rgba(255,255,255,0.04);
+      padding: 8px 10px;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      border: 1px dashed rgba(255,255,255,0.1);
+    }
+
+    .net-separator {
+      text-align: center;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #64748b;
+      letter-spacing: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .net-separator::before, .net-separator::after {
+      content: "";
+      height: 1px;
+      flex: 1;
+      background: #334155;
+    }
+
+    /* Bench Section */
+    .bench-card {
+      background: var(--bench-bg);
+      border: 1px solid #2b3954;
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .bench-tags-wrapper {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .bench-player-pill {
+      background: #25334c;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid #364869;
+    }
+
+    .bench-wait-badge {
+      background: rgba(239, 68, 68, 0.25);
+      color: #fca5a5;
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-weight: 700;
+    }
+
+    /* Footer Stats */
+    .stats-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      text-align: left;
+    }
+
+    .stats-table th, .stats-table td {
+      padding: 8px 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .stats-table th {
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <!-- Interactive Animated Header -->
+  <header>
+    <div class="title-box">
+      <h1>
+        <span class="anim-paddle">🏓</span>
+        p<span class="highlight-iiee">IIEE</span>ckleball
+        <span class="anim-pickle">🥒</span>
+      </h1>
+      <p>Skill-Tier Rotation & Fair Anti-Bench Matchmaker</p>
+    </div>
+    <div style="display: flex; gap: 8px; align-items: center;">
+      <span class="pwa-badge"><span class="dot"></span> App Ready</span>
+      <button class="btn-secondary" style="font-size:0.8rem; padding: 6px 12px;" onclick="loadDemoPreset()">⚡ Load Demo</button>
+    </div>
+  </header>
+
+  <div class="dashboard-grid">
+    <!-- Controls & Roster Column -->
+    <div class="card">
+      <h2>⚙️ Configuration</h2>
+      
+      <div class="form-group">
+        <label>Available Courts</label>
+        <select id="courtCount" onchange="persistAndRefresh()">
+          <option value="1">1 Court (4 active players)</option>
+          <option value="2" selected>2 Courts (8 active players)</option>
+          <option value="3">3 Courts (12 active players)</option>
+          <option value="4">4 Courts (16 active players)</option>
+          <option value="6">6 Courts (24 active players)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Matchmaking Strategy</label>
+        <select id="matchMode" onchange="persistAndRefresh()">
+          <option value="segregated" selected>Tier-Segregated (Beg vs Beg, Int vs Int)</option>
+          <option value="mixed_pairs">Balanced Pairs (1 Beg + 1 Int per Side)</option>
+          <option value="open">Open Social Rotation</option>
+        </select>
+      </div>
+
+      <hr style="border:0; border-top: 1px solid var(--card-border);">
+
+      <h2>👥 Add Players</h2>
+      <div class="input-row">
+        <input type="text" id="playerName" placeholder="Player name..." onkeydown="if(event.key==='Enter') addPlayer()">
+        <select id="playerSkill" style="width: 130px;">
+          <option value="beginner">🌱 Beginner</option>
+          <option value="intermediate">⚡ Interm.</option>
+        </select>
+      </div>
+      <button class="btn-primary" onclick="addPlayer()">+ Add to Roster</button>
+
+      <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:6px;">
+        <label>Active Roster (<span id="rosterCount">0</span>)</label>
+        <button class="btn-outline-danger" onclick="clearRoster()">Clear All</button>
+      </div>
+
+      <div class="roster-list" id="rosterList"></div>
+    </div>
+
+    <!-- Match Rotation & Bench Area -->
+    <div style="display: flex; flex-direction: column; gap: 18px;">
+      <div class="round-actions">
+        <div>
+          <span style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase;">Active Round</span>
+          <div style="font-size: 1.4rem; font-weight: 800; color: var(--accent);" id="roundNumberText">Round #1</div>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn-primary" style="padding: 10px 20px; font-size: 1rem;" onclick="generateNextRound()">
+            <span>🔄</span> Generate Next Round
+          </button>
+        </div>
+      </div>
+
+      <!-- Court Arena -->
+      <div class="courts-grid" id="courtsContainer"></div>
+
+      <!-- Fair Anti-Bench Resting Area -->
+      <div class="bench-card">
+        <h3 style="font-size: 0.95rem; display: flex; align-items: center; justify-content: space-between;">
+          <span>🧃 Bench & Hydration Deck (<span id="benchCount">0</span>)</span>
+          <span style="font-size: 0.75rem; color: #94a3b8; font-weight: normal;">Rotated in priority order</span>
+        </h3>
+        <div class="bench-tags-wrapper" id="benchContainer"></div>
+      </div>
+
+      <!-- Stats / Equal Play Tracker -->
+      <div class="card">
+        <h2>📊 Fair-Play Tracker</h2>
+        <div style="overflow-x: auto;">
+          <table class="stats-table">
+            <thead>
+              <tr>
+                <th>Player</th>
+                <th>Tier</th>
+                <th>Played</th>
+                <th>Benched</th>
+                <th>Consecutive Sit-outs</th>
+              </tr>
+            </thead>
+            <tbody id="statsTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================== -->
+<!-- JAVASCRIPT: ENGINE & INLINE SERVICE WORKER -->
+<!-- ========================================== -->
+<script>
+  // 1. INLINE PWA SERVICE WORKER REGISTRATION (Offline Capability)
+  if ('serviceWorker' in navigator) {
+    const swScript = `
+      self.addEventListener('install', e => self.skipWaiting());
+      self.addEventListener('activate', e => self.clients.claim());
+      self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));
+    `;
+    const blob = new Blob([swScript], { type: 'text/javascript' });
+    const swUrl = URL.createObjectURL(blob);
+    navigator.serviceWorker.register(swUrl).catch(err => console.log('SW register note:', err));
+  }
+
+  // 2. STATE STORAGE
+  let currentRound = 1;
+  let players = JSON.parse(localStorage.getItem('piiee_players')) || [];
+
+  function savePlayers() {
+    localStorage.setItem('piiee_players', JSON.stringify(players));
+    renderRoster();
+    renderStats();
+  }
+
+  function persistAndRefresh() {
+    generateNextRound();
+  }
+
+  // 3. ROSTER MANAGEMENT
+  function addPlayer(nameStr = null, tierStr = null) {
+    const nameInput = document.getElementById('playerName');
+    const skillInput = document.getElementById('playerSkill');
+    const name = nameStr || nameInput.value.trim();
+    const tier = tierStr || skillInput.value;
+
+    if (!name) return;
+
+    players.push({
+      id: Date.now() + Math.random().toString(36).substr(2, 4),
+      name: name,
+      tier: tier, // 'beginner' or 'intermediate'
+      gamesPlayed: 0,
+      gamesBenched: 0,
+      consecutiveBench: 0
+    });
+
+    if (!nameStr) nameInput.value = '';
+    savePlayers();
+  }
+
+  function deletePlayer(id) {
+    players = players.filter(p => p.id !== id);
+    savePlayers();
+  }
+
+  function clearRoster() {
+    if (confirm("Reset roster and statistics?")) {
+      players = [];
+      currentRound = 1;
+      savePlayers();
+      document.getElementById('courtsContainer').innerHTML = '';
+      document.getElementById('benchContainer').innerHTML = '';
+    }
+  }
+
+  function loadDemoPreset() {
+    players = [
+      { id: '1', name: 'Alex M.', tier: 'beginner', gamesPlayed: 0, gamesBenched: 0, consecutiveBench: 0 },
+      { id: '2', name: 'Sammy T.', tier: 'beginner', gamesPlayed: 0, gamesBenched: 0, consecutiveBench: 0 },
+      { id: '3', name: 'Jordan K.', tier: 'beginner', gamesPlayed: 0, gamesBenched: 0, consecutiveBench: 0 },
+      { id: '4', name: 'Casey R.', tier: 'beginner', gamesPlayed: 0, gamesBenched: 0, consecutiveBench: 0 },
+      { id: '5', name: 'Taylor W.', tier: 'beginner', gamesPlayed: 0, gamesBenched: 0, consecutiveBench: 0 },
+      { id: '6', name: 'Pat L.', tier: 'beginner', gamesPlayed: 0, gamesBenched: 0, consecutiveBench: 0 },
+      { id: '7', name: 'Dave B.', tier: 'intermediate', gamesPlayed: 0, gamesBenched: 0, consecutiveBench: 0 },
+      { id: '8', name: 'Elena G.', tier: 'intermediate', gamesPlayed: 0, gamesBenched: 0, consecutiveBench: 0 },
+      { id: '9', name: 'Marcus H.', tier: 'intermediate', gamesPlayed: 0, gamesBenched: 0, consecutiveBench: 0 },
+      { id: '10', name: 'Fiona Q.', tier: 'intermediate', gamesPlayed: 0, gamesBenched: 0, consecutiveBench: 0 },
+      { id: '11', name: 'Chris V.', tier: 'intermediate', gamesPlayed: 0, gamesBenched: 0, consecutiveBench: 0 },
+      { id: '12', name: 'Renee S.', tier: 'intermediate', gamesPlayed: 0, gamesBenched: 0, consecutiveBench: 0 }
+    ];
+    currentRound = 1;
+    savePlayers();
+    generateNextRound();
+  }
+
+  // 4. SELECTION & FAIR ANTI-BENCH ALGORITHM
+  function generateNextRound() {
+    const numCourts = parseInt(document.getElementById('courtCount').value);
+    const mode = document.getElementById('matchMode').value;
+    const slotsNeeded = numCourts * 4;
+
+    if (players.length < 4) {
+      alert("Please add at least 4 players to assemble a pickleball doubles match.");
+      return;
+    }
+
+    // Sort priority: prioritize players sitting out the longest (anti-bench urgency formula)
+    let sortedPool = [...players].sort((a, b) => {
+      let scoreA = (a.consecutiveBench * 1000) - (a.gamesPlayed * 50) + (a.gamesBenched * 10);
+      let scoreB = (b.consecutiveBench * 1000) - (b.gamesPlayed * 50) + (b.gamesBenched * 10);
+      return scoreB - scoreA;
+    });
+
+    let activePool = [];
+    let benchPool = [];
+
+    if (sortedPool.length <= slotsNeeded) {
+      activePool = [...sortedPool];
+      benchPool = [];
+    } else {
+      activePool = sortedPool.slice(0, slotsNeeded);
+      benchPool = sortedPool.slice(slotsNeeded);
+    }
+
+    // Distribute active players into court matches based on selected strategy
+    const courtsMatches = distributeIntoCourts(activePool, numCourts, mode);
+
+    // Update Player Metrics
+    activePool.forEach(p => {
+      const target = players.find(x => x.id === p.id);
+      if (target) {
+        target.gamesPlayed++;
+        target.consecutiveBench = 0;
+      }
+    });
+
+    benchPool.forEach(p => {
+      const target = players.find(x => x.id === p.id);
+      if (target) {
+        target.gamesBenched++;
+        target.consecutiveBench++;
+      }
+    });
+
+    // Render views
+    renderCourts(courtsMatches);
+    renderBench(benchPool);
+    renderStats();
+    document.getElementById('roundNumberText').innerText = `Round #${currentRound++}`;
+  }
+
+  function distributeIntoCourts(pool, courtCount, mode) {
+    let courts = [];
+    let beginners = pool.filter(p => p.tier === 'beginner');
+    let intermediates = pool.filter(p => p.tier === 'intermediate');
+
+    if (mode === 'segregated') {
+      // Pack full 4-player tier blocks first
+      let fullBegQuads = Math.floor(beginners.length / 4);
+      let fullIntQuads = Math.floor(intermediates.length / 4);
+
+      for (let i = 0; i < fullBegQuads; i++) {
+        courts.push({ label: 'Beginner Match', players: beginners.splice(0, 4) });
+      }
+      for (let i = 0; i < fullIntQuads; i++) {
+        courts.push({ label: 'Intermediate Match', players: intermediates.splice(0, 4) });
+      }
+
+      // Mix remnants cleanly if remaining court slots exist
+      let remaining = [...beginners, ...intermediates];
+      while (remaining.length >= 4 && courts.length < courtCount) {
+        courts.push({ label: 'Mixed Overflow', players: remaining.splice(0, 4) });
+      }
+    } else if (mode === 'mixed_pairs') {
+      // Balanced 2 Beg + 2 Int per court
+      while (beginners.length >= 2 && intermediates.length >= 2 && courts.length < courtCount) {
+        let b = beginners.splice(0, 2);
+        let inter = intermediates.splice(0, 2);
+        // Team A: [b[0], inter[0]], Team B: [b[1], inter[1]]
+        courts.push({
+          label: 'Balanced Mentorship',
+          players: [b[0], inter[0], b[1], inter[1]]
+        });
+      }
+      let leftover = [...beginners, ...intermediates];
+      while (leftover.length >= 4 && courts.length < courtCount) {
+        courts.push({ label: 'Mixed Match', players: leftover.splice(0, 4) });
+      }
+    } else {
+      // Open Social Rotation
+      let shuffled = [...pool].sort(() => Math.random() - 0.5);
+      for (let i = 0; i < courtCount && shuffled.length >= 4; i++) {
+        courts.push({ label: 'Open Social', players: shuffled.splice(0, 4) });
+      }
+    }
+
+    return courts;
+  }
+
+  // 5. RENDERING FUNCTIONS
+  function renderRoster() {
+    const list = document.getElementById('rosterList');
+    document.getElementById('rosterCount').innerText = players.length;
+    list.innerHTML = '';
+
+    players.forEach(p => {
+      const item = document.createElement('div');
+      item.className = 'player-row';
+      const icon = p.tier === 'beginner' ? '<span class="anim-sprout">🌱</span>' : '<span class="anim-spark">⚡</span>';
+      const tagClass = p.tier === 'beginner' ? 'tag-beg' : 'tag-int';
+
+      item.innerHTML = `
+        <span style="font-weight: 600;">${p.name}</span>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <span class="tag ${tagClass}">${icon} ${p.tier.slice(0,3).toUpperCase()}</span>
+          <button class="btn-outline-danger" onclick="deletePlayer('${p.id}')">✕</button>
+        </div>
+      `;
+      list.appendChild(item);
+    });
+  }
+
+  function renderCourts(courts) {
+    const container = document.getElementById('courtsContainer');
+    container.innerHTML = '';
+
+    if (courts.length === 0) {
+      container.innerHTML = `<div style="grid-column: 1/-1; padding: 24px; text-align: center; color: #64748b; background: var(--card-bg); border-radius: 12px;">Not enough players to fill a court. Add more to roster.</div>`;
+      return;
+    }
+
+    courts.forEach((court, idx) => {
+      const p = court.players;
+      const card = document.createElement('div');
+      card.className = 'court-card';
+      card.innerHTML = `
+        <div class="court-header">
+          <span>Court ${idx + 1}</span>
+          <span style="font-size:0.75rem; color: var(--accent);">${court.label}</span>
+        </div>
+        <div class="court-mat">
+          <div class="doubles-team">
+            <span style="font-size: 0.72rem; color: #64748b; font-weight: 700;">TEAM 1</span>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span>${p[0].name}</span>
+              <span class="tag ${p[0].tier==='beginner'?'tag-beg':'tag-int'}">${p[0].tier==='beginner'?'🌱':'⚡'}</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span>${p[1].name}</span>
+              <span class="tag ${p[1].tier==='beginner'?'tag-beg':'tag-int'}">${p[1].tier==='beginner'?'🌱':'⚡'}</span>
+            </div>
+          </div>
+          <div class="net-separator">NET</div>
+          <div class="doubles-team">
+            <span style="font-size: 0.72rem; color: #64748b; font-weight: 700;">TEAM 2</span>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span>${p[2].name}</span>
+              <span class="tag ${p[2].tier==='beginner'?'tag-beg':'tag-int'}">${p[2].tier==='beginner'?'🌱':'⚡'}</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span>${p[3].name}</span>
+              <span class="tag ${p[3].tier==='beginner'?'tag-beg':'tag-int'}">${p[3].tier==='beginner'?'🌱':'⚡'}</span>
+            </div>
+          </div>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+  }
+
+  function renderBench(benched) {
+    const container = document.getElementById('benchContainer');
+    document.getElementById('benchCount').innerText = benched.length;
+    container.innerHTML = '';
+
+    if (benched.length === 0) {
+      container.innerHTML = '<span style="color:#64748b; font-size:0.85rem;">No players sitting out this round! 🏓</span>';
+      return;
+    }
+
+    benched.forEach(p => {
+      const pill = document.createElement('div');
+      pill.className = 'bench-player-pill';
+      pill.innerHTML = `
+        <span>${p.name}</span>
+        <span class="tag ${p.tier==='beginner'?'tag-beg':'tag-int'}">${p.tier==='beginner'?'🌱':'⚡'}</span>
+        ${p.consecutiveBench > 0 ? `<span class="bench-wait-badge">Sat ${p.consecutiveBench}x</span>` : ''}
+      `;
+      container.appendChild(pill);
+    });
+  }
+
+  function renderStats() {
+    const tbody = document.getElementById('statsTableBody');
+    tbody.innerHTML = '';
+    
+    // Sort players by total games played descending
+    const sorted = [...players].sort((a,b) => b.gamesPlayed - a.gamesPlayed);
+    
+    sorted.forEach(p => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="font-weight:600;">${p.name}</td>
+        <td><span class="tag ${p.tier==='beginner'?'tag-beg':'tag-int'}">${p.tier==='beginner'?'🌱 Beg':'⚡ Int'}</span></td>
+        <td style="color:var(--accent); font-weight:700;">${p.gamesPlayed}</td>
+        <td>${p.gamesBenched}</td>
+        <td>${p.consecutiveBench > 1 ? `<span style="color:#f87171; font-weight:700;">⚠️ ${p.consecutiveBench}</span>` : p.consecutiveBench}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // Initial Load
+  renderRoster();
+  renderStats();
+</script>
+</body>
+</html>

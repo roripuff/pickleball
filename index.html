@@ -1,8 +1,28 @@
-<title>pIIEEckleball - Court & Rotation Manager</title>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>pIIEEckleball - Court & Rotation Manager</title>
+
+  <!-- PWA & Mobile Meta -->
+  <meta name="theme-color" content="#10b981">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="pIIEEckleball">
+
+  <!-- Embedded Web App Manifest -->
+  <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22pIIEEckleball%20Court%20Rotation%22%2C%22short_name%22%3A%22pIIEEckleball%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23020617%22%2C%22theme_color%22%3A%22%2310b981%22%7D">
+
+  <!-- Favicon / App Icon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏓</text></svg>">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏓</text></svg>">
+
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
+  
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -14,7 +34,7 @@
               green: '#15803d',
               darkgreen: '#14532d',
               court: '#0d9488',
-              surface: '#0f172a'
+              surface: '#020617'
             }
           }
         }
@@ -22,444 +42,382 @@
     }
   </script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800;900&display=swap');
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-tap-highlight-color: transparent;
     }
     .custom-scrollbar::-webkit-scrollbar {
       width: 6px;
       height: 6px;
     }
-    .custom-scrollbar::-webkit-scrollbar-track {
-      background: rgba(0, 0, 0, 0.05);
-    }
     .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: rgba(100, 116, 139, 0.3);
+      background: rgba(100, 116, 139, 0.4);
       border-radius: 9999px;
     }
 
-    /* Animated Icons & Emoticon Keyframes */
     @keyframes pickleBounce {
-      0%, 100% {
-        transform: translateY(0) rotate(0deg) scale(1);
-      }
-      30% {
-        transform: translateY(-8px) rotate(-12deg) scale(1.08);
-      }
-      60% {
-        transform: translateY(2px) rotate(6deg) scale(0.95);
-      }
-      80% {
-        transform: translateY(-2px) rotate(-3deg) scale(1.02);
-      }
+      0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
+      30% { transform: translateY(-7px) rotate(-10deg) scale(1.08); }
+      60% { transform: translateY(2px) rotate(5deg) scale(0.96); }
+      80% { transform: translateY(-2px) rotate(-2deg) scale(1.02); }
     }
-
     @keyframes leafSway {
       0%, 100% { transform: rotate(0deg) scale(1); }
       50% { transform: rotate(14deg) scale(1.15); }
     }
-
     @keyframes energyPulse {
       0%, 100% { transform: scale(1); filter: drop-shadow(0 0 2px rgba(250, 204, 21, 0.4)); }
       50% { transform: scale(1.22); filter: drop-shadow(0 0 8px rgba(250, 204, 21, 0.9)); }
     }
-
     @keyframes benchSip {
       0%, 100% { transform: translateY(0) rotate(0deg); }
       40% { transform: translateY(-3px) rotate(-8deg); }
       70% { transform: translateY(1px) rotate(4deg); }
     }
-
     @keyframes netVibrate {
       0%, 100% { transform: scale(1); }
       50% { transform: scale(1.06); }
     }
 
-    .animate-pickle-bounce {
-      display: inline-block;
-      animation: pickleBounce 2.2s infinite ease-in-out;
-      transform-origin: bottom center;
-    }
-
-    .animate-leaf-sway {
-      display: inline-block;
-      animation: leafSway 2.5s infinite ease-in-out;
-      transform-origin: bottom left;
-    }
-
-    .animate-energy-pulse {
-      display: inline-block;
-      animation: energyPulse 1.6s infinite ease-in-out;
-    }
-
-    .animate-bench-sip {
-      display: inline-block;
-      animation: benchSip 3s infinite ease-in-out;
-    }
-
-    .animate-net-pulse {
-      animation: netVibrate 2.4s infinite ease-in-out;
-    }
+    .animate-pickle-bounce { display: inline-block; animation: pickleBounce 2.2s infinite ease-in-out; }
+    .animate-leaf-sway { display: inline-block; animation: leafSway 2.5s infinite ease-in-out; }
+    .animate-energy-pulse { display: inline-block; animation: energyPulse 1.6s infinite ease-in-out; }
+    .animate-bench-sip { display: inline-block; animation: benchSip 3s infinite ease-in-out; }
+    .animate-net-pulse { animation: netVibrate 2.4s infinite ease-in-out; }
   </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col text-base selection:bg-lime-400 selection:text-slate-950">
 
-  <!-- Header / Navigation -->
-  <header class="border-b border-slate-800 bg-slate-950/80 backdrop-blur sticky top-0 z-40">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-between">
+  <!-- Header -->
+  <header class="border-b-2 border-slate-800 bg-slate-950/95 backdrop-blur sticky top-0 z-40 px-3 py-3 sm:py-4 shadow-lg shadow-black/40">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
       <div class="flex items-center gap-3">
-        <div class="relative w-11 h-11 rounded-xl bg-gradient-to-br from-lime-400 via-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-lime-500/25 border border-lime-300/30">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-lime-400 via-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-lime-500/25 border-2 border-lime-300/40 shrink-0">
           <span class="text-2xl animate-pickle-bounce select-none">🏓</span>
-          <span class="absolute -top-1 -right-1 text-xs animate-leaf-sway select-none">🥒</span>
         </div>
         <div>
-          <h1 class="font-black text-xl sm:text-2xl tracking-tight text-white flex items-center gap-2">
-            <span>pIIEEckleball</span>
-            <span class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-lime-400/10 text-lime-400 border border-lime-400/20 flex items-center gap-1">
-              <span class="animate-pulse">●</span> Fair Rotations
+          <h1 class="font-black text-2xl sm:text-3xl tracking-tight text-white flex items-center gap-2">
+            <span>p<span class="text-lime-400">IIEE</span>ckleball</span>
+            <span class="text-xs sm:text-sm font-extrabold px-2.5 py-1 rounded-full bg-lime-400/20 text-lime-300 border border-lime-400/30 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-lime-400 animate-ping"></span> Rotations
             </span>
           </h1>
-          <p class="text-xs text-slate-400 hidden sm:flex items-center gap-1">
-            <span>Skill-Balanced Courts</span> &bull; <span>Anti-Bench Flow</span> &bull; <span class="text-lime-400 font-semibold">Keep Dinking! ✨</span>
-          </p>
+          <p class="text-xs sm:text-sm text-slate-400 font-medium">Fair Court Rotations &bull; Anti-Bench Matchmaker</p>
         </div>
       </div>
-      <div class="flex items-center gap-2">
-        <button id="resetSessionBtn" class="px-3 py-1.5 text-xs font-medium text-slate-300 hover:text-rose-400 border border-slate-700 hover:border-rose-500/30 rounded-lg transition-colors flex items-center gap-1.5">
-          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i> Reset All
+
+      <div class="flex items-center gap-2 shrink-0">
+        <button id="resetSessionBtn" class="h-11 px-3 sm:px-4 text-xs sm:text-sm font-bold text-slate-300 hover:text-rose-400 border-2 border-slate-800 hover:border-rose-500/40 rounded-xl transition-colors flex items-center gap-1.5 bg-slate-900 active:scale-95">
+          <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">Reset</span>
         </button>
-        <span class="h-5 w-px bg-slate-800"></span>
-        <div class="flex items-center gap-1 bg-slate-800/80 p-1 rounded-lg border border-slate-700/60 text-xs">
-          <span class="px-2 py-1 rounded bg-slate-700 text-slate-200 font-semibold flex items-center gap-1">
-            <span class="text-sm animate-pickle-bounce">🎾</span> Round <span id="currentRoundDisplay">0</span>
-          </span>
+        <div class="h-11 px-3.5 bg-slate-900 border-2 border-slate-800 rounded-xl flex items-center gap-2 text-sm font-extrabold text-lime-400 shadow-inner">
+          <span class="text-base animate-pickle-bounce">🎾</span>
+          <span>Round <span id="currentRoundDisplay" class="text-white text-base">0</span></span>
         </div>
       </div>
     </div>
   </header>
 
-  <!-- Main App Layout -->
-  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+  <!-- Main Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-5 lg:p-6 space-y-5">
 
     <!-- Global Alert / Status Banner -->
-    <div id="noticeBanner" class="hidden p-3.5 rounded-xl border flex items-center justify-between text-sm transition-all duration-300">
-      <div class="flex items-center gap-2.5">
-        <i id="noticeIcon" data-lucide="info" class="w-5 h-5 flex-shrink-0"></i>
+    <div id="noticeBanner" class="hidden p-4 rounded-2xl border-2 flex items-center justify-between text-base font-bold transition-all shadow-xl">
+      <div class="flex items-center gap-3">
+        <i id="noticeIcon" data-lucide="info" class="w-6 h-6 flex-shrink-0"></i>
         <span id="noticeText">Notification message here</span>
       </div>
-      <button onclick="dismissNotice()" class="text-slate-400 hover:text-white p-1">
-        <i data-lucide="x" class="w-4 h-4"></i>
+      <button onclick="dismissNotice()" class="text-slate-400 hover:text-white p-2">
+        <i data-lucide="x" class="w-5 h-5"></i>
       </button>
     </div>
 
-    <!-- Top Action Bar: Presets & Mode Summary -->
-    <section class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+    <!-- Quick Presets & Status Toolbar -->
+    <section class="bg-slate-900/90 border-2 border-slate-800 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3 shadow-xl">
       <div class="flex flex-wrap items-center gap-2">
-        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider mr-1">Quick Presets:</span>
-        <button onclick="loadPreset(12, 6, 2, 'segregated')" class="px-3 py-1.5 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-lime-400 rounded-lg border border-slate-700 hover:border-lime-500/40 transition">
-          12 Players / 2 Courts (6 Beg, 6 Int)
+        <span class="text-xs font-black text-slate-400 uppercase tracking-wider mr-1">Presets:</span>
+        <button onclick="loadPreset(12, 6, 2, 'segregated')" class="h-11 px-3 sm:px-4 text-xs sm:text-sm font-bold bg-slate-800 hover:bg-slate-700 active:scale-95 text-lime-300 rounded-xl border border-slate-700 transition">
+          12P / 2 Courts (6 Beg, 6 Int)
         </button>
-        <button onclick="loadPreset(16, 8, 3, 'mixed')" class="px-3 py-1.5 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-teal-300 rounded-lg border border-slate-700 hover:border-teal-500/40 transition">
-          16 Players / 3 Courts (Balanced Pairs)
+        <button onclick="loadPreset(16, 8, 3, 'mixed')" class="h-11 px-3 sm:px-4 text-xs sm:text-sm font-bold bg-slate-800 hover:bg-slate-700 active:scale-95 text-teal-300 rounded-xl border border-slate-700 transition">
+          16P / 3 Courts (Pairs)
         </button>
-        <button onclick="loadPreset(8, 4, 2, 'open')" class="px-3 py-1.5 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-sky-300 rounded-lg border border-slate-700 hover:border-sky-500/40 transition">
-          8 Players / 2 Courts (Open Social)
+        <button onclick="loadPreset(24, 12, 5, 'segregated')" class="h-11 px-3 sm:px-4 text-xs sm:text-sm font-bold bg-slate-800 hover:bg-slate-700 active:scale-95 text-amber-300 rounded-xl border border-slate-700 transition">
+          24P / 5 Courts (Large Club)
+        </button>
+        <button onclick="loadPreset(8, 4, 2, 'open')" class="h-11 px-3 sm:px-4 text-xs sm:text-sm font-bold bg-slate-800 hover:bg-slate-700 active:scale-95 text-sky-300 rounded-xl border border-slate-700 transition">
+          8P / 2 Courts (Open)
         </button>
       </div>
 
-      <!-- Quick Session Stats -->
-      <div class="flex items-center gap-4 text-xs">
+      <div class="flex items-center gap-4 text-sm font-bold bg-slate-950/80 px-4 py-2 rounded-xl border border-slate-800">
         <div class="flex items-center gap-1.5">
-          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+          <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
           <span class="text-slate-400">Playing:</span>
-          <span id="statPlayingCount" class="font-bold text-white">0</span>
+          <span id="statPlayingCount" class="text-white font-black text-base">0</span>
         </div>
         <div class="flex items-center gap-1.5">
-          <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
-          <span class="text-slate-400">Benched:</span>
-          <span id="statBenchedCount" class="font-bold text-white">0</span>
+          <span class="w-3 h-3 rounded-full bg-amber-500"></span>
+          <span class="text-slate-400">Bench:</span>
+          <span id="statBenchedCount" class="text-white font-black text-base">0</span>
         </div>
         <div class="flex items-center gap-1.5">
-          <span class="w-2.5 h-2.5 rounded-full bg-slate-500"></span>
-          <span class="text-slate-400">Total Players:</span>
-          <span id="statTotalCount" class="font-bold text-white">0</span>
+          <span class="w-3 h-3 rounded-full bg-slate-400"></span>
+          <span class="text-slate-400">Total:</span>
+          <span id="statTotalCount" class="text-white font-black text-base">0</span>
         </div>
       </div>
     </section>
 
-    <!-- Main Grid: Left Panel (Setup & Bench & Leaderboard) + Right Panel (Active Courts) -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    <!-- Main Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
 
       <!-- LEFT COLUMN: Controls & Roster (5 cols on lg) -->
-      <div class="lg:col-span-5 space-y-6">
+      <div class="lg:col-span-5 space-y-5">
 
-        <!-- 1. Settings / Match Configuration Card -->
-        <div class="bg-slate-950/70 border border-slate-800/90 rounded-2xl p-5 shadow-xl">
-          <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
-            <h2 class="text-base font-bold text-white flex items-center gap-2">
-              <i data-lucide="sliders" class="w-4 h-4 text-lime-400"></i> Match & Court Rules
+        <!-- 1. Settings Card -->
+        <div class="bg-slate-900/90 border-2 border-slate-800 rounded-2xl p-5 shadow-2xl space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <h2 class="text-lg font-black text-white flex items-center gap-2">
+              <i data-lucide="sliders" class="w-5 h-5 text-lime-400"></i> Court & Rule Setup
             </h2>
-            <span class="text-xs text-slate-400">Configure anytime</span>
+            <span class="text-xs font-semibold text-slate-400">Doubles or Singles</span>
           </div>
 
-          <div class="space-y-4">
-            <!-- Courts and Format -->
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1">
-                  <i data-lucide="grid" class="w-3.5 h-3.5 text-lime-400"></i> Available Courts
-                </label>
-                <div class="flex items-center">
-                  <button type="button" onclick="adjustCourtCount(-1)" class="w-8 h-9 rounded-l-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center justify-center font-bold text-sm">-</button>
-                  <input type="number" id="courtCountInput" min="1" max="12" value="2" class="w-full h-9 bg-slate-900 border-y border-slate-700 text-center font-bold text-white focus:outline-none focus:border-lime-500">
-                  <button type="button" onclick="adjustCourtCount(1)" class="w-8 h-9 rounded-r-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 flex items-center justify-center font-bold text-sm">+</button>
-                </div>
-              </div>
-
-              <div>
-                <label class="block text-xs font-semibold text-slate-300 mb-1 flex items-center gap-1">
-                  <i data-lucide="users" class="w-3.5 h-3.5 text-lime-400"></i> Match Format
-                </label>
-                <select id="formatSelector" class="w-full h-9 bg-slate-900 border border-slate-700 rounded-lg px-2 text-xs font-semibold text-slate-200 focus:outline-none focus:border-lime-500">
-                  <option value="doubles" selected>Doubles (4 / court)</option>
-                  <option value="singles">Singles (2 / court)</option>
-                </select>
-              </div>
-            </div>
-
-            <!-- Matchmaking Mode -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center justify-between">
-                <span class="flex items-center gap-1"><i data-lucide="target" class="w-3.5 h-3.5 text-lime-400"></i> Skill Matchmaking Policy</span>
-              </label>
-              <div class="grid grid-cols-1 gap-2">
-                <label class="relative flex items-center p-2.5 rounded-xl border border-slate-800 bg-slate-900/60 hover:bg-slate-900 cursor-pointer transition">
-                  <input type="radio" name="matchMode" value="segregated" checked class="text-lime-500 focus:ring-0 mr-3">
-                  <div>
-                    <div class="text-xs font-bold text-slate-100 flex items-center gap-1.5">
-                      <span>Tier Segregated</span>
-                      <span class="text-[10px] bg-emerald-500/20 text-emerald-300 px-1.5 py-0.5 rounded">Target: Beg vs Beg / Int vs Int</span>
-                    </div>
-                    <p class="text-[11px] text-slate-400">Courts reserved for Beginners and Intermediates separately.</p>
-                  </div>
-                </label>
-
-                <label class="relative flex items-center p-2.5 rounded-xl border border-slate-800 bg-slate-900/60 hover:bg-slate-900 cursor-pointer transition">
-                  <input type="radio" name="matchMode" value="mixed" class="text-teal-500 focus:ring-0 mr-3">
-                  <div>
-                    <div class="text-xs font-bold text-slate-100 flex items-center gap-1.5">
-                      <span>Balanced Mixed Pairs</span>
-                      <span class="text-[10px] bg-teal-500/20 text-teal-300 px-1.5 py-0.5 rounded">Mentor: 1 Beg + 1 Int / side</span>
-                    </div>
-                    <p class="text-[11px] text-slate-400">Each team pairs a beginner with an intermediate player for parity.</p>
-                  </div>
-                </label>
-
-                <label class="relative flex items-center p-2.5 rounded-xl border border-slate-800 bg-slate-900/60 hover:bg-slate-900 cursor-pointer transition">
-                  <input type="radio" name="matchMode" value="open" class="text-sky-500 focus:ring-0 mr-3">
-                  <div>
-                    <div class="text-xs font-bold text-slate-100 flex items-center gap-1.5">
-                      <span>Open Social Rotation</span>
-                      <span class="text-[10px] bg-sky-500/20 text-sky-300 px-1.5 py-0.5 rounded">Fair wait time focus</span>
-                    </div>
-                    <p class="text-[11px] text-slate-400">Randomized matchings strictly based on bench wait times.</p>
-                  </div>
-                </label>
+              <label class="block text-xs font-black text-slate-300 uppercase tracking-wider mb-1.5">Courts Available</label>
+              <div class="flex items-center h-12">
+                <button type="button" onclick="adjustCourtCount(-1)" class="w-12 h-12 rounded-l-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-white border-2 border-r-0 border-slate-700 flex items-center justify-center font-black text-xl">-</button>
+                <input type="number" id="courtCountInput" min="1" max="16" value="2" class="w-full h-12 bg-slate-950 border-y-2 border-slate-700 text-center font-black text-xl text-white focus:outline-none focus:border-lime-500">
+                <button type="button" onclick="adjustCourtCount(1)" class="w-12 h-12 rounded-r-xl bg-slate-800 hover:bg-slate-700 active:scale-95 text-white border-2 border-l-0 border-slate-700 flex items-center justify-center font-black text-xl">+</button>
               </div>
             </div>
 
-            <!-- Fairness Guarantee Note -->
-            <div class="bg-lime-950/20 border border-lime-500/20 rounded-xl p-3 flex items-start gap-2.5">
-              <i data-lucide="shield-check" class="w-4 h-4 text-lime-400 mt-0.5 flex-shrink-0"></i>
-              <p class="text-[11px] text-lime-200/90 leading-relaxed">
-                <strong>Anti-Bench Guarantee:</strong> The rotation algorithm prioritizes players with the highest consecutive bench streak and lowest total games, ensuring no one rests 2 consecutive rounds if court capacity permits.
-              </p>
+            <div>
+              <label class="block text-xs font-black text-slate-300 uppercase tracking-wider mb-1.5">Game Format</label>
+              <select id="formatSelector" class="w-full h-12 bg-slate-950 border-2 border-slate-700 rounded-xl px-3 text-sm font-bold text-slate-100 focus:outline-none focus:border-lime-500">
+                <option value="doubles" selected>Doubles (4 / court)</option>
+                <option value="singles">Singles (2 / court)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Matchmaking Policy -->
+          <div>
+            <label class="block text-xs font-black text-slate-300 uppercase tracking-wider mb-2">Skill Matchmaking Mode</label>
+            <div class="space-y-2">
+              <label class="flex items-start p-3 rounded-xl border-2 border-slate-800 bg-slate-950/80 hover:border-slate-700 cursor-pointer transition">
+                <input type="radio" name="matchMode" value="segregated" checked class="w-5 h-5 text-lime-500 mt-0.5 mr-3 accent-lime-400">
+                <div>
+                  <div class="text-sm font-extrabold text-white flex items-center gap-2">
+                    <span>Tier Segregated</span>
+                    <span class="text-xs bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-bold">Beg vs Beg &bull; Int vs Int</span>
+                  </div>
+                  <p class="text-xs text-slate-400 mt-0.5">Courts are separated by skill level for clean parity.</p>
+                </div>
+              </label>
+
+              <label class="flex items-start p-3 rounded-xl border-2 border-slate-800 bg-slate-950/80 hover:border-slate-700 cursor-pointer transition">
+                <input type="radio" name="matchMode" value="mixed" class="w-5 h-5 text-teal-500 mt-0.5 mr-3 accent-teal-400">
+                <div>
+                  <div class="text-sm font-extrabold text-white flex items-center gap-2">
+                    <span>Balanced Mixed Pairs</span>
+                    <span class="text-xs bg-teal-500/20 text-teal-300 px-2 py-0.5 rounded-full font-bold">1 Beg + 1 Int per team</span>
+                  </div>
+                  <p class="text-xs text-slate-400 mt-0.5">Each team pairs a beginner with an intermediate player.</p>
+                </div>
+              </label>
+
+              <label class="flex items-start p-3 rounded-xl border-2 border-slate-800 bg-slate-950/80 hover:border-slate-700 cursor-pointer transition">
+                <input type="radio" name="matchMode" value="open" class="w-5 h-5 text-sky-500 mt-0.5 mr-3 accent-sky-400">
+                <div>
+                  <div class="text-sm font-extrabold text-white flex items-center gap-2">
+                    <span>Open Social</span>
+                    <span class="text-xs bg-sky-500/20 text-sky-300 px-2 py-0.5 rounded-full font-bold">Fair Queue First</span>
+                  </div>
+                  <p class="text-xs text-slate-400 mt-0.5">Randomized matches focused strictly on shortest bench wait time.</p>
+                </div>
+              </label>
             </div>
           </div>
         </div>
 
-        <!-- 2. Player Roster Management -->
-        <div class="bg-slate-950/70 border border-slate-800/90 rounded-2xl p-5 shadow-xl">
-          <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
-            <div>
-              <h2 class="text-base font-bold text-white flex items-center gap-2">
-                <i data-lucide="user-check" class="w-4 h-4 text-lime-400"></i> Player Roster
-                <span id="playerBadgeCount" class="text-xs bg-slate-800 px-2 py-0.5 rounded-full text-slate-300 border border-slate-700">0</span>
-              </h2>
-            </div>
+        <!-- 2. Player Roster Card -->
+        <div class="bg-slate-900/90 border-2 border-slate-800 rounded-2xl p-5 shadow-2xl space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+            <h2 class="text-lg font-black text-white flex items-center gap-2">
+              <i data-lucide="user-check" class="w-5 h-5 text-lime-400"></i> Players Roster
+              <span id="playerBadgeCount" class="text-xs font-black bg-slate-800 px-2.5 py-1 rounded-full text-lime-400 border border-slate-700">0</span>
+            </h2>
             <div class="flex items-center gap-1.5">
-              <button onclick="bulkSetAllSkill('beginner')" title="Set all to Beginner" class="px-2 py-1 text-[11px] bg-slate-800 hover:bg-slate-700 text-emerald-400 rounded-md border border-slate-700">All Beg</button>
-              <button onclick="bulkSetAllSkill('intermediate')" title="Set all to Intermediate" class="px-2 py-1 text-[11px] bg-slate-800 hover:bg-slate-700 text-teal-400 rounded-md border border-slate-700">All Int</button>
+              <button onclick="bulkSetAllSkill('beginner')" class="px-2.5 py-1 text-xs font-bold bg-slate-800 hover:bg-slate-700 active:scale-95 text-emerald-400 rounded-lg border border-slate-700">All Beg</button>
+              <button onclick="bulkSetAllSkill('intermediate')" class="px-2.5 py-1 text-xs font-bold bg-slate-800 hover:bg-slate-700 active:scale-95 text-amber-400 rounded-lg border border-slate-700">All Int</button>
             </div>
           </div>
 
           <!-- Add Single Player Form -->
-          <div class="flex items-center gap-2 mb-3">
-            <input type="text" id="newPlayerName" placeholder="New Player Name..." class="flex-1 h-9 bg-slate-900 border border-slate-700 rounded-lg px-3 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-lime-500">
-            <select id="newPlayerSkill" class="h-9 bg-slate-900 border border-slate-700 rounded-lg px-2 text-xs font-semibold text-slate-200 focus:outline-none focus:border-lime-500">
-              <option value="beginner">Beginner</option>
-              <option value="intermediate">Intermediate</option>
-            </select>
-            <button onclick="addNewPlayerFromInput()" class="h-9 px-3.5 bg-lime-500 hover:bg-lime-400 text-slate-950 font-bold rounded-lg text-xs flex items-center gap-1 transition shadow-md shadow-lime-500/20">
-              <i data-lucide="user-plus" class="w-3.5 h-3.5"></i> Add
-            </button>
+          <div class="flex flex-col sm:flex-row items-stretch gap-2">
+            <input type="text" id="newPlayerName" placeholder="Enter player name..." class="flex-1 h-12 bg-slate-950 border-2 border-slate-700 rounded-xl px-3 text-base font-bold text-white placeholder-slate-500 focus:outline-none focus:border-lime-500">
+            <div class="flex items-center gap-2">
+              <select id="newPlayerSkill" class="h-12 bg-slate-950 border-2 border-slate-700 rounded-xl px-3 text-sm font-extrabold text-slate-200 focus:outline-none focus:border-lime-500">
+                <option value="beginner">🌱 Beginner</option>
+                <option value="intermediate">⚡ Interm.</option>
+              </select>
+              <button onclick="addNewPlayerFromInput()" class="h-12 px-5 bg-lime-400 hover:bg-lime-300 active:scale-95 text-slate-950 font-black rounded-xl text-sm flex items-center justify-center gap-1.5 transition shadow-lg shadow-lime-500/25 shrink-0">
+                <i data-lucide="user-plus" class="w-4 h-4"></i> Add
+              </button>
+            </div>
           </div>
 
-          <!-- Quick Bulk Generator Accordion / Toggle -->
-          <details class="group mb-4 bg-slate-900/50 rounded-xl border border-slate-800/80 p-2.5 text-xs">
-            <summary class="font-medium text-slate-400 cursor-pointer flex items-center justify-between select-none">
-              <span class="flex items-center gap-1.5 text-slate-300"><i data-lucide="wand-2" class="w-3.5 h-3.5 text-lime-400"></i> Fast Multi-Player Generator</span>
-              <span class="text-[10px] text-slate-500 group-open:rotate-180 transition-transform">▼</span>
+          <!-- Fast Bulk Generator Accordion -->
+          <details class="group bg-slate-950/70 rounded-xl border border-slate-800 p-3 text-sm">
+            <summary class="font-bold text-slate-300 cursor-pointer flex items-center justify-between select-none">
+              <span class="flex items-center gap-2"><i data-lucide="wand-2" class="w-4 h-4 text-lime-400"></i> Fast Multi-Player Generator</span>
+              <span class="text-xs text-slate-500 group-open:rotate-180 transition-transform">▼</span>
             </summary>
-            <div class="mt-3 pt-3 border-t border-slate-800 grid grid-cols-2 gap-2">
+            <div class="mt-3 pt-3 border-t border-slate-800 grid grid-cols-2 gap-3">
               <div>
-                <label class="block text-[11px] text-slate-400 mb-1"># Beginners</label>
-                <input type="number" id="bulkBegCount" value="4" min="0" max="30" class="w-full bg-slate-950 border border-slate-700 rounded-md px-2 py-1 text-xs text-white">
+                <label class="block text-xs font-bold text-slate-400 mb-1"># Beginners</label>
+                <input type="number" id="bulkBegCount" value="6" min="0" max="60" class="w-full h-10 bg-slate-900 border border-slate-700 rounded-lg px-2 text-base font-bold text-white text-center">
               </div>
               <div>
-                <label class="block text-[11px] text-slate-400 mb-1"># Intermediates</label>
-                <input type="number" id="bulkIntCount" value="4" min="0" max="30" class="w-full bg-slate-950 border border-slate-700 rounded-md px-2 py-1 text-xs text-white">
+                <label class="block text-xs font-bold text-slate-400 mb-1"># Intermediates</label>
+                <input type="number" id="bulkIntCount" value="6" min="0" max="60" class="w-full h-10 bg-slate-900 border border-slate-700 rounded-lg px-2 text-base font-bold text-white text-center">
               </div>
               <div class="col-span-2 pt-1 flex justify-end">
-                <button onclick="generateBulkPlayers()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-lime-400 font-semibold rounded-md border border-slate-700 text-xs">
-                  Generate & Append Players
+                <button onclick="generateBulkPlayers()" class="h-10 px-4 bg-slate-800 hover:bg-slate-700 text-lime-400 font-bold rounded-lg border border-slate-700 text-xs">
+                  Generate & Add
                 </button>
               </div>
             </div>
           </details>
 
           <!-- Player List with Scroll -->
-          <div id="playerRosterList" class="max-h-60 overflow-y-auto space-y-1.5 pr-1 custom-scrollbar">
-            <!-- Dynamically populated roster rows -->
+          <div id="playerRosterList" class="max-h-72 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
+            <!-- Dynamically populated -->
           </div>
 
-          <div class="mt-3 pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
-            <div class="flex gap-3">
-              <span>Beginners: <strong id="rosterBegCount" class="text-emerald-400">0</strong></span>
-              <span>Intermediates: <strong id="rosterIntCount" class="text-teal-400">0</strong></span>
+          <div class="pt-3 border-t border-slate-800 flex items-center justify-between text-sm font-bold text-slate-400">
+            <div class="flex gap-4">
+              <span>Beginners: <strong id="rosterBegCount" class="text-emerald-400 text-base">0</strong></span>
+              <span>Intermediates: <strong id="rosterIntCount" class="text-amber-400 text-base">0</strong></span>
             </div>
-            <button onclick="clearAllPlayers()" class="text-slate-500 hover:text-rose-400 text-[11px] transition">Clear Roster</button>
-          </div>
-        </div>
-
-        <!-- 3. Player Stats & Wait-Time Leaderboard -->
-        <div class="bg-slate-950/70 border border-slate-800/90 rounded-2xl p-5 shadow-xl">
-          <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-800">
-            <h2 class="text-sm font-bold text-white flex items-center gap-2">
-              <i data-lucide="bar-chart-2" class="w-4 h-4 text-lime-400"></i> Participation & Fair Play Table
-            </h2>
-            <span class="text-[11px] text-slate-400">Tracks Bench Equality</span>
-          </div>
-
-          <div class="overflow-x-auto max-h-52 custom-scrollbar">
-            <table class="w-full text-left text-xs">
-              <thead class="text-[10px] uppercase tracking-wider text-slate-400 border-b border-slate-800 sticky top-0 bg-slate-950">
-                <tr>
-                  <th class="py-1.5 px-2">Player</th>
-                  <th class="py-1.5 px-2">Level</th>
-                  <th class="py-1.5 px-2 text-center" title="Games Played">Played</th>
-                  <th class="py-1.5 px-2 text-center" title="Rounds on bench">Benched</th>
-                  <th class="py-1.5 px-2 text-center" title="Consecutive bench streak">Streak</th>
-                  <th class="py-1.5 px-2 text-center" title="Win/Loss Record">W / L</th>
-                </tr>
-              </thead>
-              <tbody id="playerStatsTableBody" class="divide-y divide-slate-800/60 font-medium">
-                <!-- Dynamically populated -->
-              </tbody>
-            </table>
+            <button onclick="clearAllPlayers()" class="text-rose-400 hover:text-rose-300 text-xs underline transition font-bold">Clear All</button>
           </div>
         </div>
 
       </div>
 
       <!-- RIGHT COLUMN: Active Session, Courts & Bench (7 cols on lg) -->
-      <div class="lg:col-span-7 space-y-6">
+      <div class="lg:col-span-7 space-y-5">
 
         <!-- Round Control Center Banner -->
-        <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border border-slate-800 rounded-2xl p-5 shadow-2xl relative overflow-hidden">
-          <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-lime-500/5 rounded-full blur-2xl pointer-events-none"></div>
-
+        <div class="bg-gradient-to-r from-slate-900 via-slate-900 to-slate-950 border-2 border-slate-800 rounded-2xl p-5 shadow-2xl relative overflow-hidden">
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <span class="text-[11px] uppercase tracking-wider font-extrabold text-lime-400">Match Orchestrator</span>
-              <h2 class="text-xl font-black text-white flex items-center gap-2">
-                Round <span id="roundNumberHeader">0</span>
-                <span id="roundStatusBadge" class="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 font-semibold border border-slate-700">Not Started</span>
+              <span class="text-xs uppercase tracking-wider font-black text-lime-400">Match Orchestrator</span>
+              <h2 class="text-2xl sm:text-3xl font-black text-white flex items-center gap-2">
+                Round <span id="roundNumberHeader" class="text-lime-400">0</span>
+                <span id="roundStatusBadge" class="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-300 font-bold border border-slate-700">Not Started</span>
               </h2>
-              <p id="roundSummarySubtext" class="text-xs text-slate-400 mt-0.5">
-                Configure players and click generate to roll the next fair rotation.
+              <p id="roundSummarySubtext" class="text-xs sm:text-sm text-slate-400 mt-1 font-medium">
+                Set up your players and tap generate to start the first fair rotation.
               </p>
             </div>
 
-            <div class="flex items-center gap-2">
-              <button id="generateRoundBtn" onclick="generateNextRound()" class="px-5 py-2.5 bg-gradient-to-r from-lime-400 to-emerald-500 hover:from-lime-300 hover:to-emerald-400 text-slate-950 font-black rounded-xl text-sm shadow-lg shadow-lime-500/25 flex items-center gap-2 transition-all transform active:scale-95">
-                <i data-lucide="play" class="w-4 h-4 fill-slate-950"></i>
+            <div class="flex items-center gap-2 shrink-0">
+              <button id="generateRoundBtn" onclick="generateNextRound()" class="w-full sm:w-auto h-14 px-6 bg-gradient-to-r from-lime-400 to-emerald-400 hover:from-lime-300 hover:to-emerald-300 active:scale-95 text-slate-950 font-black rounded-xl text-base shadow-lg shadow-lime-500/25 flex items-center justify-center gap-2 transition">
+                <i data-lucide="play" class="w-5 h-5 fill-slate-950"></i>
                 <span>Generate Next Round</span>
               </button>
             </div>
           </div>
         </div>
 
-        <!-- The Bench / Resting Area (Crucial to visually emphasize waiting queue) -->
-        <div class="bg-slate-950/70 border border-slate-800/90 rounded-2xl p-5 shadow-xl">
-          <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-800">
+        <!-- The Bench / Resting Deck -->
+        <div class="bg-slate-900/90 border-2 border-slate-800 rounded-2xl p-5 shadow-2xl space-y-3">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-800">
             <div class="flex items-center gap-2">
-              <div class="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 shadow-inner">
-                <span class="text-base animate-bench-sip select-none">🧃</span>
+              <div class="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 shadow-inner">
+                <span class="text-lg animate-bench-sip select-none">🧃</span>
               </div>
               <div>
-                <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                  The Bench (Hydration & Rest)
-                  <span id="benchBadgeCount" class="text-xs bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.2 rounded-full flex items-center gap-1">
+                <h3 class="text-base font-black text-white flex items-center gap-2">
+                  The Bench & Hydration Deck
+                  <span id="benchBadgeCount" class="text-xs bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2.5 py-0.5 rounded-full font-bold flex items-center gap-1">
                     <span class="animate-pulse">●</span> 0 Resting
                   </span>
                 </h3>
               </div>
             </div>
-            <span class="text-[11px] text-slate-400 flex items-center gap-1">
-              <span class="animate-bench-sip">🧘</span> Automatic top-priority next round
+            <span class="text-xs text-slate-400 hidden sm:flex items-center gap-1 font-semibold">
+              <span class="animate-bench-sip">🧘</span> Automatic top priority next round
             </span>
           </div>
 
           <div id="benchContainer" class="flex flex-wrap gap-2.5 min-h-[50px] items-center">
-            <span class="text-xs text-slate-500 italic py-2">No players are currently resting on the bench.</span>
+            <span class="text-sm text-slate-500 italic py-2">No players are currently resting on the bench.</span>
           </div>
         </div>
 
         <!-- Active Courts Display Grid -->
-        <div>
-          <div class="flex items-center justify-between mb-3">
-            <h3 class="text-base font-bold text-white flex items-center gap-2">
-              <i data-lucide="layout-grid" class="w-4 h-4 text-emerald-400"></i> Active Courts
+        <div class="space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-black text-white flex items-center gap-2">
+              <i data-lucide="layout-grid" class="w-5 h-5 text-emerald-400"></i> Active Courts
             </h3>
-            <div class="text-xs text-slate-400 flex items-center gap-3">
+            <div class="text-xs sm:text-sm font-bold text-slate-400 flex items-center gap-3">
               <span class="flex items-center gap-1"><span class="animate-leaf-sway">🌱</span> Beginner</span>
               <span class="flex items-center gap-1"><span class="animate-energy-pulse">⚡</span> Intermediate</span>
             </div>
           </div>
 
           <div id="courtsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Empty state placeholder -->
-            <div class="col-span-full py-12 px-4 border-2 border-dashed border-slate-800 rounded-2xl text-center bg-slate-950/30">
-              <i data-lucide="shield-alert" class="w-10 h-10 mx-auto text-slate-600 mb-3"></i>
-              <h4 class="text-slate-300 font-semibold text-sm">No Active Round in Progress</h4>
-              <p class="text-xs text-slate-500 max-w-sm mx-auto mt-1">
-                Set up your players and courts on the left, then click <strong>"Generate Next Round"</strong> to create balanced court pairings.
-              </p>
-            </div>
+            <!-- Dynamically populated courts -->
           </div>
         </div>
 
-        <!-- History Log Drawer -->
-        <div class="bg-slate-950/70 border border-slate-800/90 rounded-2xl p-5 shadow-xl">
-          <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-800">
-            <h3 class="text-sm font-bold text-white flex items-center gap-2">
-              <i data-lucide="history" class="w-4 h-4 text-slate-400"></i> Match History & Prior Rounds
+        <!-- Player Stats & Bench Equality Table -->
+        <div class="bg-slate-900/90 border-2 border-slate-800 rounded-2xl p-5 shadow-2xl space-y-3">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+            <h2 class="text-base font-black text-white flex items-center gap-2">
+              <i data-lucide="bar-chart-2" class="w-5 h-5 text-lime-400"></i> Participation & Fair Play Table
+            </h2>
+            <span class="text-xs text-slate-400 font-semibold">Bench Equality Tracker</span>
+          </div>
+
+          <div class="overflow-x-auto max-h-64 custom-scrollbar">
+            <table class="w-full text-left text-sm">
+              <thead class="text-xs font-black uppercase tracking-wider text-slate-400 border-b border-slate-800 sticky top-0 bg-slate-900">
+                <tr>
+                  <th class="py-2 px-3">Player</th>
+                  <th class="py-2 px-3">Level</th>
+                  <th class="py-2 px-3 text-center">Played</th>
+                  <th class="py-2 px-3 text-center">Benched</th>
+                  <th class="py-2 px-3 text-center">Streak</th>
+                  <th class="py-2 px-3 text-center">W / L</th>
+                </tr>
+              </thead>
+              <tbody id="playerStatsTableBody" class="divide-y divide-slate-800/80 font-bold">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- History Log -->
+        <div class="bg-slate-900/90 border-2 border-slate-800 rounded-2xl p-5 shadow-2xl space-y-3">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+            <h3 class="text-base font-black text-white flex items-center gap-2">
+              <i data-lucide="history" class="w-5 h-5 text-slate-400"></i> Match History
             </h3>
-            <span id="historyRoundsCount" class="text-xs text-slate-400">0 rounds recorded</span>
+            <span id="historyRoundsCount" class="text-xs font-bold text-slate-400">0 rounds recorded</span>
           </div>
           <div id="historyContainer" class="space-y-3 max-h-60 overflow-y-auto custom-scrollbar pr-1">
-            <p class="text-xs text-slate-500 italic py-1">No completed rounds yet.</p>
+            <p class="text-sm text-slate-500 italic py-1">No completed rounds yet.</p>
           </div>
         </div>
 
@@ -470,79 +428,106 @@
   </main>
 
   <!-- Footer -->
-  <footer class="border-t border-slate-800 bg-slate-950/60 mt-auto py-4 text-center text-xs text-slate-500 flex items-center justify-center gap-1.5">
-    <span>pIIEEckleball</span> &bull; <span>Skill-Balanced Court Rotations & Bench Minimizer</span> &bull; <span class="animate-pickle-bounce">🥒</span>
+  <footer class="border-t-2 border-slate-800 bg-slate-950 mt-auto py-5 text-center text-xs sm:text-sm text-slate-400 flex items-center justify-center gap-2 font-semibold">
+    <span>pIIEEckleball</span> &bull; <span>Skill-Balanced Court Rotations</span> &bull; <span class="animate-pickle-bounce">🥒</span>
   </footer>
 
   <!-- Application Logic -->
   <script>
+    // 1. INLINE PWA SERVICE WORKER REGISTRATION
+    if ('serviceWorker' in navigator) {
+      const swScript = `
+        self.addEventListener('install', e => self.skipWaiting());
+        self.addEventListener('activate', e => self.clients.claim());
+        self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => caches.match(e.request))));
+      `;
+      const blob = new Blob([swScript], { type: 'text/javascript' });
+      navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(err => console.log('SW Note:', err));
+    }
+
     /* ----------------------------------------------------
        State Management
        ---------------------------------------------------- */
     let state = {
       courtsCount: 2,
-      format: 'doubles', // 'doubles' (4) or 'singles' (2)
-      matchMode: 'segregated', // 'segregated', 'mixed', 'open'
+      format: 'doubles',
+      matchMode: 'segregated',
       currentRound: 0,
       players: [],
-      activeMatches: [], // [{ courtNumber, mode, teamA: [pIds], teamB: [pIds], scoreA: null, scoreB: null, finished: false }]
-      currentBench: [],  // [pIds]
-      roundHistory: []   // [{ roundNumber, mode, matches: [...], bench: [...] }]
+      activeMatches: [],
+      currentBench: [],
+      roundHistory: []
     };
 
     let nextPlayerId = 1;
 
-    /* ----------------------------------------------------
-       Initialization & Presets
-       ---------------------------------------------------- */
     window.addEventListener('DOMContentLoaded', () => {
-      // Load standard default preset: 12 players, 2 courts, segregated
-      loadPreset(12, 6, 2, 'segregated');
+      const saved = localStorage.getItem('piiee_v2_state');
+      if (saved) {
+        try {
+          state = JSON.parse(saved);
+          nextPlayerId = (state.players.reduce((max, p) => Math.max(max, p.id), 0) || 0) + 1;
+        } catch (e) {
+          loadPreset(12, 6, 2, 'segregated');
+        }
+      } else {
+        loadPreset(12, 6, 2, 'segregated');
+      }
+
       setupEventListeners();
+      syncUIControls();
       renderAll();
     });
 
+    function saveState() {
+      localStorage.setItem('piiee_v2_state', JSON.stringify(state));
+    }
+
     function setupEventListeners() {
-      // Court inputs
       const courtInput = document.getElementById('courtCountInput');
       courtInput.addEventListener('change', (e) => {
         let val = parseInt(e.target.value) || 1;
-        state.courtsCount = Math.max(1, Math.min(12, val));
+        state.courtsCount = Math.max(1, Math.min(16, val));
         e.target.value = state.courtsCount;
+        saveState();
         updateStatsBar();
       });
 
-      // Format Selector
       document.getElementById('formatSelector').addEventListener('change', (e) => {
         state.format = e.target.value;
-        showNotice(`Format updated to ${state.format.toUpperCase()} (${state.format === 'doubles' ? '4 players/court' : '2 players/court'}).`, 'info');
+        saveState();
+        showNotice(`Format updated to ${state.format.toUpperCase()} (${state.format === 'doubles' ? '4 per court' : '2 per court'}).`, 'info');
         updateStatsBar();
       });
 
-      // Mode Radios
       document.querySelectorAll("input[name='matchMode']").forEach(radio => {
         radio.addEventListener('change', (e) => {
           state.matchMode = e.target.value;
-          showNotice(`Matchmaking mode switched to: ${getModeLabel(state.matchMode)}.`, 'info');
+          saveState();
+          showNotice(`Matchmaking mode: ${getModeLabel(state.matchMode)}.`, 'info');
         });
       });
 
-      // Reset
       document.getElementById('resetSessionBtn').addEventListener('click', () => {
-        resetFullSession();
+        if (confirm("Reset current session and stats?")) resetFullSession();
       });
 
-      // Enter key for new player input
       document.getElementById('newPlayerName').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-          addNewPlayerFromInput();
-        }
+        if (e.key === 'Enter') addNewPlayerFromInput();
       });
     }
 
-    function adjustCourtCount(delta) {
-      state.courtsCount = Math.max(1, Math.min(12, state.courtsCount + delta));
+    function syncUIControls() {
       document.getElementById('courtCountInput').value = state.courtsCount;
+      document.getElementById('formatSelector').value = state.format;
+      const radio = document.querySelector(`input[name='matchMode'][value='${state.matchMode}']`);
+      if (radio) radio.checked = true;
+    }
+
+    function adjustCourtCount(delta) {
+      state.courtsCount = Math.max(1, Math.min(16, state.courtsCount + delta));
+      document.getElementById('courtCountInput').value = state.courtsCount;
+      saveState();
       updateStatsBar();
     }
 
@@ -557,20 +542,18 @@
       state.matchMode = mode;
       state.format = 'doubles';
 
-      document.getElementById('courtCountInput').value = courts;
-      document.getElementById('formatSelector').value = 'doubles';
-      
-      const radio = document.querySelector(`input[name='matchMode'][value='${mode}']`);
-      if (radio) radio.checked = true;
+      syncUIControls();
 
-      const firstNames = [
-        "Alex", "Jordan", "Taylor", "Morgan", "Sam", "Chris", "Pat", "Riley",
-        "Casey", "Jamie", "Avery", "Dakota", "Reese", "Quinn", "Skyler", "Cameron"
+      const names = [
+        "Alex M.", "Sammy T.", "Jordan K.", "Casey R.", "Taylor W.", "Pat L.", 
+        "Dave B.", "Elena G.", "Marcus H.", "Fiona Q.", "Chris V.", "Renee S.", 
+        "Jamie P.", "Dakota Z.", "Morgan B.", "Quinn S.", "Liam W.", "Chloe D.",
+        "Noah K.", "Maya R.", "Ethan T.", "Grace H.", "Lucas G.", "Sophia L."
       ];
 
       for (let i = 0; i < total; i++) {
         const skill = (i < beginnerCount) ? 'beginner' : 'intermediate';
-        const name = (i < firstNames.length) ? firstNames[i] : `Player ${i + 1}`;
+        const name = (i < names.length) ? names[i] : `Player ${i + 1}`;
         state.players.push({
           id: nextPlayerId++,
           name: name,
@@ -580,16 +563,17 @@
           consecutiveBench: 0,
           wins: 0,
           losses: 0,
-          active: true // can be toggled if someone leaves
+          active: true
         });
       }
 
-      showNotice(`Loaded preset: ${total} players (${beginnerCount} Beg, ${total - beginnerCount} Int) on ${courts} courts.`, 'success');
+      saveState();
+      showNotice(`Loaded preset: ${total} players on ${courts} courts.`, 'success');
       renderAll();
     }
 
     /* ----------------------------------------------------
-       Player Management
+       Player Roster Management
        ---------------------------------------------------- */
     function addNewPlayerFromInput() {
       const nameInput = document.getElementById('newPlayerName');
@@ -614,7 +598,8 @@
       });
 
       nameInput.value = "";
-      showNotice(`Added player "${name}" (${skillSelect.value}).`, "success");
+      saveState();
+      showNotice(`Added player "${name}".`, "success");
       renderAll();
     }
 
@@ -655,6 +640,7 @@
         });
       }
 
+      saveState();
       showNotice(`Added ${begCount} Beginners and ${intCount} Intermediates.`, "success");
       renderAll();
     }
@@ -663,6 +649,7 @@
       const p = state.players.find(x => x.id === id);
       if (p) {
         p.skill = p.skill === 'beginner' ? 'intermediate' : 'beginner';
+        saveState();
         renderAll();
       }
     }
@@ -671,102 +658,81 @@
       const p = state.players.find(x => x.id === id);
       const name = p ? p.name : 'Player';
       state.players = state.players.filter(x => x.id !== id);
-      // Clean bench/matches if in active list
       state.currentBench = state.currentBench.filter(x => x !== id);
+      saveState();
       showNotice(`Removed ${name} from roster.`, "info");
       renderAll();
     }
 
     function bulkSetAllSkill(skill) {
       state.players.forEach(p => p.skill = skill);
+      saveState();
       showNotice(`All players set to ${skill.toUpperCase()}.`, "info");
       renderAll();
     }
 
     function clearAllPlayers() {
+      if (!confirm("Clear all players from roster?")) return;
       state.players = [];
       state.currentBench = [];
       state.activeMatches = [];
       state.currentRound = 0;
+      saveState();
       showNotice("Roster cleared.", "info");
       renderAll();
     }
 
     /* ----------------------------------------------------
-       Fair Rotation & Matchmaking Algorithm
+       Fixed Allocation & Matchmaking Engine
        ---------------------------------------------------- */
     function generateNextRound() {
       const activePlayers = state.players.filter(p => p.active);
       const playersPerCourt = state.format === 'doubles' ? 4 : 2;
-      const totalCourtCapacity = state.courtsCount * playersPerCourt;
 
       if (activePlayers.length < playersPerCourt) {
-        showNotice(`Need at least ${playersPerCourt} active players to generate a game on 1 court.`, 'error');
+        showNotice(`Need at least ${playersPerCourt} players to fill a court.`, 'error');
         return;
       }
 
-      // 1. Calculate how many courts can be filled
-      const courtsToUse = Math.min(state.courtsCount, Math.floor(activePlayers.length / playersPerCourt));
+      // Max courts we can physically fill given total active players
+      const maxFillableCourts = Math.floor(activePlayers.length / playersPerCourt);
+      const courtsToUse = Math.min(state.courtsCount, maxFillableCourts);
       const playingSlots = courtsToUse * playersPerCourt;
-      const benchedSlots = activePlayers.length - playingSlots;
 
-      // 2. Bench selection priority scoring (The Fair Anti-Bench Formula)
-      // High score = Priority to play this round
-      // Factor 1: Consecutive bench rounds (MUST play if sat out previously!)
-      // Factor 2: Total games played (lowest plays first)
-      // Factor 3: Total benched (highest gets priority)
-      // Factor 4: Slight random jitter to break ties fairly
-      function getPlayPriority(player) {
-        let score = 0;
-        score += player.consecutiveBench * 1000; // Urgent priority
-        score -= player.gamesPlayed * 50;        // Favor those who played least
-        score += player.gamesBenched * 10;       // Favor those with more historical wait
-        score += Math.random() * 5;              // Randomize exact ties
-        return score;
+      if (courtsToUse < state.courtsCount) {
+        showNotice(`Note: You configured ${state.courtsCount} courts, but ${activePlayers.length} players can only fill ${courtsToUse} court${courtsToUse > 1 ? 's' : ''}. Need ${state.courtsCount * playersPerCourt} players for all courts.`, 'info');
       }
 
-      // Group players by skill
-      const beginners = activePlayers.filter(p => p.skill === 'beginner');
-      const intermediates = activePlayers.filter(p => p.skill === 'intermediate');
+      // Priority ranking: players who sat longest get picked first
+      function getPlayPriority(player) {
+        return (player.consecutiveBench * 1000) - (player.gamesPlayed * 50) + (player.gamesBenched * 10) + (Math.random() * 5);
+      }
 
-      let courtAllocations = []; // Array of arrays of 4 or 2 players
-      let chosenPlayers = [];
-      let restingPlayers = [];
+      const sortedAll = [...activePlayers].sort((a, b) => getPlayPriority(b) - getPlayPriority(a));
+      const poolForThisRound = sortedAll.slice(0, playingSlots);
+      const restingPlayers = sortedAll.slice(playingSlots);
+
+      let courtAllocations = [];
 
       if (state.matchMode === 'segregated') {
-        // SEGREGATED MODE:
-        // Try to create pure Beginner courts and pure Intermediate courts
-        // Calculate how many courts each group ideally gets based on population
-        courtAllocations = allocateSegregatedCourts(beginners, intermediates, courtsToUse, playersPerCourt, getPlayPriority);
+        courtAllocations = allocateSegregatedCourts(poolForThisRound, courtsToUse, playersPerCourt);
       } else if (state.matchMode === 'mixed') {
-        // BALANCED MIXED PAIRS:
-        // Each court gets 2 Beginners and 2 Intermediates (in doubles: Partner = 1 Beg + 1 Int vs 1 Beg + 1 Int)
-        courtAllocations = allocateMixedPairsCourts(beginners, intermediates, courtsToUse, playersPerCourt, getPlayPriority);
+        courtAllocations = allocateMixedPairsCourts(poolForThisRound, courtsToUse, playersPerCourt);
       } else {
-        // OPEN SOCIAL:
-        // Purely rank by wait time/fair rotation regardless of skill
-        const sortedAll = [...activePlayers].sort((a, b) => getPlayPriority(b) - getPlayPriority(a));
-        const selected = sortedAll.slice(0, playingSlots);
-        restingPlayers = sortedAll.slice(playingSlots);
-
-        // Shuffle selected lightly to form varied courts
-        const shuffled = shuffleArray(selected);
+        const shuffled = shuffleArray(poolForThisRound);
         for (let c = 0; c < courtsToUse; c++) {
           courtAllocations.push({
             type: 'open',
+            label: 'Open Social Match',
             players: shuffled.slice(c * playersPerCourt, (c + 1) * playersPerCourt)
           });
         }
       }
 
-      // Collect all assigned player IDs
+      // Record lifetime participation
       const assignedIds = new Set();
       courtAllocations.forEach(c => c.players.forEach(p => assignedIds.add(p.id)));
 
-      // Players not in courts go to the bench
-      restingPlayers = activePlayers.filter(p => !assignedIds.has(p.id));
-
-      // 3. Update player lifetime stats for this round
       activePlayers.forEach(p => {
         if (assignedIds.has(p.id)) {
           p.gamesPlayed += 1;
@@ -777,7 +743,6 @@
         }
       });
 
-      // 4. Create active match objects
       state.currentRound += 1;
       state.currentBench = restingPlayers.map(p => p.id);
       state.activeMatches = [];
@@ -788,7 +753,6 @@
 
         if (state.format === 'doubles') {
           if (court.type === 'mixed-balanced' && court.players.length === 4) {
-            // Mixed balanced doubles: Team A = 1 Beg + 1 Int, Team B = 1 Beg + 1 Int
             const begs = court.players.filter(p => p.skill === 'beginner');
             const ints = court.players.filter(p => p.skill === 'intermediate');
             if (begs.length >= 2 && ints.length >= 2) {
@@ -799,12 +763,10 @@
               teamB = [court.players[2].id, court.players[3].id];
             }
           } else {
-            // Standard division
             teamA = [court.players[0].id, court.players[1].id];
             teamB = [court.players[2].id, court.players[3].id];
           }
         } else {
-          // Singles
           teamA = [court.players[0].id];
           teamB = [court.players[1].id];
         }
@@ -821,7 +783,6 @@
         });
       });
 
-      // Archive into round history
       state.roundHistory.unshift({
         roundNumber: state.currentRound,
         mode: state.matchMode,
@@ -830,66 +791,46 @@
         bench: [...state.currentBench]
       });
 
-      showNotice(`Round ${state.currentRound} generated! ${assignedIds.size} players playing across ${courtAllocations.length} courts. ${restingPlayers.length} on bench.`, 'success');
+      saveState();
+      showNotice(`Round ${state.currentRound} generated! ${assignedIds.size} players across ${courtAllocations.length} courts.`, 'success');
       renderAll();
     }
 
-    /* Helper: Segregated Court Allocator */
-    function allocateSegregatedCourts(beginners, intermediates, courtsToUse, playersPerCourt, priorityFn) {
+    // Fixed: Guaranteed to allocate exactly `courtsToUse` courts without early breaks
+    function allocateSegregatedCourts(pool, courtsToUse, playersPerCourt) {
       const allocations = [];
-      const sortedBeg = [...beginners].sort((a, b) => priorityFn(b) - priorityFn(a));
-      const sortedInt = [...intermediates].sort((a, b) => priorityFn(b) - priorityFn(a));
+      let beginners = pool.filter(p => p.skill === 'beginner');
+      let intermediates = pool.filter(p => p.skill === 'intermediate');
 
-      let begFullCourts = Math.floor(sortedBeg.length / playersPerCourt);
-      let intFullCourts = Math.floor(sortedInt.length / playersPerCourt);
+      while (allocations.length < courtsToUse) {
+        let assignedInPass = false;
 
-      let courtsAssigned = 0;
-      let begIdx = 0;
-      let intIdx = 0;
-
-      // Distribute available courts proportionally
-      while (courtsAssigned < courtsToUse) {
-        let added = false;
-
-        // Try giving a court to Beginner if they have enough and haven't exceeded share
-        if (begFullCourts > 0 && (courtsAssigned < courtsToUse)) {
+        if (beginners.length >= playersPerCourt) {
           allocations.push({
             type: 'segregated-beg',
-            label: 'Beginners Court',
-            players: sortedBeg.slice(begIdx, begIdx + playersPerCourt)
+            label: '🌱 Beginner Tier',
+            players: beginners.splice(0, playersPerCourt)
           });
-          begIdx += playersPerCourt;
-          begFullCourts--;
-          courtsAssigned++;
-          added = true;
+          assignedInPass = true;
         }
 
-        // Try giving a court to Intermediate
-        if (intFullCourts > 0 && (courtsAssigned < courtsToUse)) {
+        if (allocations.length < courtsToUse && intermediates.length >= playersPerCourt) {
           allocations.push({
             type: 'segregated-int',
-            label: 'Intermediates Court',
-            players: sortedInt.slice(intIdx, intIdx + playersPerCourt)
+            label: '⚡ Intermediate Tier',
+            players: intermediates.splice(0, playersPerCourt)
           });
-          intIdx += playersPerCourt;
-          intFullCourts--;
-          courtsAssigned++;
-          added = true;
+          assignedInPass = true;
         }
 
-        // If neither can form a pure full court, pool remaining highest priority players into a mixed court
-        if (!added && courtsAssigned < courtsToUse) {
-          const remainingBeg = sortedBeg.slice(begIdx);
-          const remainingInt = sortedInt.slice(intIdx);
-          const pool = [...remainingBeg, ...remainingInt].sort((a, b) => priorityFn(b) - priorityFn(a));
-
-          if (pool.length >= playersPerCourt) {
+        if (!assignedInPass) {
+          const remaining = [...beginners, ...intermediates];
+          while (remaining.length >= playersPerCourt && allocations.length < courtsToUse) {
             allocations.push({
               type: 'mixed-overflow',
-              label: 'Mixed Tier Overflow',
-              players: pool.slice(0, playersPerCourt)
+              label: '🔄 Mixed Tier Overflow',
+              players: remaining.splice(0, playersPerCourt)
             });
-            courtsAssigned++;
           }
           break;
         }
@@ -898,54 +839,32 @@
       return allocations;
     }
 
-    /* Helper: Mixed Balanced Court Allocator (Doubles: 2 Beg + 2 Int per court) */
-    function allocateMixedPairsCourts(beginners, intermediates, courtsToUse, playersPerCourt, priorityFn) {
+    // Fixed: Guaranteed to allocate exactly `courtsToUse` courts
+    function allocateMixedPairsCourts(pool, courtsToUse, playersPerCourt) {
       const allocations = [];
-      const sortedBeg = [...beginners].sort((a, b) => priorityFn(b) - priorityFn(a));
-      const sortedInt = [...intermediates].sort((a, b) => priorityFn(b) - priorityFn(a));
+      let beginners = pool.filter(p => p.skill === 'beginner');
+      let intermediates = pool.filter(p => p.skill === 'intermediate');
 
-      let begIdx = 0;
-      let intIdx = 0;
-
-      for (let c = 0; c < courtsToUse; c++) {
-        if (playersPerCourt === 4) {
-          // Doubles: Need 2 Beginners + 2 Intermediates
-          if (sortedBeg.length - begIdx >= 2 && sortedInt.length - intIdx >= 2) {
-            const bPair = sortedBeg.slice(begIdx, begIdx + 2);
-            const iPair = sortedInt.slice(intIdx, intIdx + 2);
-            begIdx += 2;
-            intIdx += 2;
-            allocations.push({
-              type: 'mixed-balanced',
-              label: 'Balanced Pairs (Beg + Int)',
-              players: [...bPair, ...iPair]
-            });
-          } else {
-            // Fallback: take whoever has highest wait time
-            const remaining = [...sortedBeg.slice(begIdx), ...sortedInt.slice(intIdx)].sort((a, b) => priorityFn(b) - priorityFn(a));
-            if (remaining.length >= 4) {
-              allocations.push({
-                type: 'mixed-social',
-                label: 'Mixed Social (Best Wait Time)',
-                players: remaining.slice(0, 4)
-              });
-              // Advance indices roughly
-              break;
-            }
-          }
-        } else {
-          // Singles: 1 Beg vs 1 Beg, or 1 Int vs 1 Int, or fair pair
-          const pool = [...sortedBeg.slice(begIdx), ...sortedInt.slice(intIdx)].sort((a, b) => priorityFn(b) - priorityFn(a));
-          if (pool.length >= 2) {
-            allocations.push({
-              type: 'mixed-singles',
-              label: 'Singles Match',
-              players: pool.slice(0, 2)
-            });
-            begIdx += 1;
-            intIdx += 1;
-          }
+      if (playersPerCourt === 4) {
+        while (allocations.length < courtsToUse && beginners.length >= 2 && intermediates.length >= 2) {
+          const bPair = beginners.splice(0, 2);
+          const iPair = intermediates.splice(0, 2);
+          allocations.push({
+            type: 'mixed-balanced',
+            label: '🤝 Balanced Mixed Pairs',
+            players: [...bPair, ...iPair]
+          });
         }
+      }
+
+      // Overflow remainder into general mixed matches so all courts get filled
+      const leftover = [...beginners, ...intermediates];
+      while (leftover.length >= playersPerCourt && allocations.length < courtsToUse) {
+        allocations.push({
+          type: 'mixed-social',
+          label: '🔄 Mixed Overflow',
+          players: leftover.splice(0, playersPerCourt)
+        });
       }
 
       return allocations;
@@ -961,7 +880,7 @@
     }
 
     /* ----------------------------------------------------
-       Match Score & Result Recording
+       Score & Game Recording
        ---------------------------------------------------- */
     function recordMatchScore(courtIndex, teamAScore, teamBScore) {
       const match = state.activeMatches[courtIndex];
@@ -972,7 +891,6 @@
       match.scoreA = sA;
       match.scoreB = sB;
 
-      // If scores differ, we can determine winner
       if (sA !== sB) {
         match.finished = true;
         const winnerTeam = sA > sB ? match.teamA : match.teamB;
@@ -988,11 +906,12 @@
           if (p) p.losses = (p.losses || 0) + 1;
         });
 
-        showNotice(`Court ${match.courtNumber} finished! Score: ${sA} - ${sB}. Stats updated.`, 'success');
+        showNotice(`Court ${match.courtNumber} final: ${sA}-${sB}. Record saved.`, 'success');
       } else {
         match.finished = false;
       }
 
+      saveState();
       renderAll();
     }
 
@@ -1000,11 +919,12 @@
       const match = state.activeMatches[courtIndex];
       if (!match) return;
       match.finished = !match.finished;
+      saveState();
       renderAll();
     }
 
     /* ----------------------------------------------------
-       UI Rendering Functions
+       Rendering Views
        ---------------------------------------------------- */
     function renderAll() {
       renderRoster();
@@ -1015,10 +935,7 @@
       updateHeaderAndBadges();
       updateStatsBar();
 
-      // Refresh lucide icons dynamically rendered
-      if (window.lucide) {
-        lucide.createIcons();
-      }
+      if (window.lucide) lucide.createIcons();
     }
 
     function updateHeaderAndBadges() {
@@ -1028,16 +945,16 @@
       const statusBadge = document.getElementById('roundStatusBadge');
       if (state.currentRound === 0) {
         statusBadge.textContent = 'Not Started';
-        statusBadge.className = 'text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400 font-semibold border border-slate-700';
+        statusBadge.className = 'text-xs px-3 py-1 rounded-full bg-slate-800 text-slate-400 font-extrabold border border-slate-700';
       } else {
         statusBadge.textContent = 'In Progress';
-        statusBadge.className = 'text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-semibold border border-emerald-500/30';
+        statusBadge.className = 'text-xs px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 font-extrabold border border-emerald-500/40';
       }
 
       const activePlayingCount = state.activeMatches.reduce((acc, m) => acc + m.teamA.length + m.teamB.length, 0);
       document.getElementById('roundSummarySubtext').textContent = state.currentRound === 0
         ? 'Setup your roster, select courts & skill policy, then start Round 1.'
-        : `${activePlayingCount} active players on ${state.activeMatches.length} courts. Next round will advance benched players first.`;
+        : `${activePlayingCount} active players across ${state.activeMatches.length} courts.`;
     }
 
     function updateStatsBar() {
@@ -1060,7 +977,7 @@
       document.getElementById('playerBadgeCount').textContent = `${state.players.length} players`;
 
       if (state.players.length === 0) {
-        listEl.innerHTML = `<div class="text-center py-6 text-xs text-slate-500 italic">No players in roster. Add above or use presets.</div>`;
+        listEl.innerHTML = `<div class="text-center py-8 text-sm text-slate-500 font-semibold italic">No players added yet.</div>`;
         document.getElementById('rosterBegCount').textContent = '0';
         document.getElementById('rosterIntCount').textContent = '0';
         return;
@@ -1075,21 +992,21 @@
         const isPlaying = state.activeMatches.some(m => m.teamA.includes(p.id) || m.teamB.includes(p.id));
 
         const row = document.createElement('div');
-        row.className = "flex items-center justify-between p-2 rounded-lg bg-slate-900 border border-slate-800/80 hover:border-slate-700 text-xs transition";
+        row.className = "flex items-center justify-between p-3 rounded-xl bg-slate-950 border-2 border-slate-800/80 hover:border-slate-700 transition";
 
         row.innerHTML = `
-          <div class="flex items-center gap-2 min-w-0">
-            <span class="${isBeg ? 'animate-leaf-sway' : 'animate-energy-pulse'} select-none">${isBeg ? '🌱' : '⚡'}</span>
-            <span class="font-medium text-slate-200 truncate max-w-[130px] sm:max-w-[180px]">${escapeHtml(p.name)}</span>
-            ${isPlaying ? '<span class="text-[9px] bg-emerald-500/10 text-emerald-400 px-1.5 py-0.2 rounded border border-emerald-500/20 font-semibold flex items-center gap-0.5"><span class="animate-pickle-bounce text-[10px]">🏓</span> Court</span>' : ''}
-            ${isBenched ? '<span class="text-[9px] bg-amber-500/10 text-amber-400 px-1.5 py-0.2 rounded border border-amber-500/20 font-semibold flex items-center gap-0.5"><span class="animate-bench-sip text-[10px]">🧃</span> Bench</span>' : ''}
+          <div class="flex items-center gap-2.5 min-w-0">
+            <span class="${isBeg ? 'animate-leaf-sway' : 'animate-energy-pulse'} select-none text-lg">${isBeg ? '🌱' : '⚡'}</span>
+            <span class="font-extrabold text-base text-slate-100 truncate">${escapeHtml(p.name)}</span>
+            ${isPlaying ? '<span class="text-xs bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full font-extrabold border border-emerald-500/30">Court</span>' : ''}
+            ${isBenched ? '<span class="text-xs bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded-full font-extrabold border border-amber-500/30">Bench</span>' : ''}
           </div>
-          <div class="flex items-center gap-1.5">
-            <button onclick="togglePlayerSkill(${p.id})" title="Click to toggle skill" class="px-2 py-0.5 rounded text-[10px] font-bold tracking-wide uppercase transition flex items-center gap-1 ${isBeg ? 'bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 border border-emerald-500/30' : 'bg-teal-500/20 text-teal-300 hover:bg-teal-500/30 border border-teal-500/30'}">
+          <div class="flex items-center gap-2 shrink-0">
+            <button onclick="togglePlayerSkill(${p.id})" class="h-9 px-3 rounded-lg text-xs font-black tracking-wide uppercase transition flex items-center gap-1 ${isBeg ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'}">
               <span>${isBeg ? '🌱 BEG' : '⚡ INT'}</span>
             </button>
-            <button onclick="removePlayer(${p.id})" title="Remove player" class="p-1 text-slate-500 hover:text-rose-400 transition">
-              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            <button onclick="removePlayer(${p.id})" class="h-9 w-9 flex items-center justify-center text-slate-500 hover:text-rose-400 rounded-lg hover:bg-slate-900 transition">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
             </button>
           </div>
         `;
@@ -1108,9 +1025,9 @@
 
       if (state.currentBench.length === 0) {
         container.innerHTML = `
-          <div class="flex items-center gap-2 text-xs text-slate-400 py-2">
-            <span class="text-sm">✨</span>
-            <span>Zero wait time! Everyone is active on court.</span>
+          <div class="flex items-center gap-2 text-sm font-bold text-slate-400 py-2">
+            <span class="text-lg">✨</span>
+            <span>Zero wait time! Everyone is on a court.</span>
           </div>`;
         return;
       }
@@ -1123,19 +1040,19 @@
         const isBeg = p.skill === 'beginner';
 
         const chip = document.createElement('div');
-        chip.className = `flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs font-semibold shadow-sm transition ${
+        chip.className = `flex items-center gap-2.5 px-3.5 py-2 rounded-2xl border-2 text-sm font-extrabold shadow-md transition ${
           isCriticalWait 
-            ? 'bg-rose-950/40 border-rose-500/50 text-rose-300 animate-pulse'
-            : 'bg-amber-950/30 border-amber-500/40 text-amber-200'
+            ? 'bg-rose-950/60 border-rose-500 text-rose-200 animate-pulse'
+            : 'bg-amber-950/40 border-amber-500/60 text-amber-200'
         }`;
 
         chip.innerHTML = `
-          <div class="flex items-center gap-1.5">
-            <span class="animate-bench-sip select-none">${isCriticalWait ? '⏰' : '🧃'}</span>
-            <span class="${isBeg ? 'text-emerald-300' : 'text-teal-300'}">${isBeg ? '🌱' : '⚡'} ${escapeHtml(p.name)}</span>
+          <div class="flex items-center gap-2">
+            <span class="animate-bench-sip select-none text-base">${isCriticalWait ? '⏰' : '🧃'}</span>
+            <span class="text-base ${isBeg ? 'text-emerald-300' : 'text-amber-300'}">${isBeg ? '🌱' : '⚡'} ${escapeHtml(p.name)}</span>
           </div>
-          <span class="text-[10px] px-1.5 py-0.5 rounded ${isCriticalWait ? 'bg-rose-900/60 text-rose-200' : 'bg-amber-900/60 text-amber-200'}">
-            Sat: ${p.consecutiveBench} rnd${p.consecutiveBench > 1 ? 's' : ''}
+          <span class="text-xs px-2 py-0.5 rounded-full ${isCriticalWait ? 'bg-rose-900 text-rose-200' : 'bg-amber-900 text-amber-200'}">
+            Sat: ${p.consecutiveBench}x
           </span>
         `;
         container.appendChild(chip);
@@ -1148,11 +1065,11 @@
 
       if (state.activeMatches.length === 0) {
         grid.innerHTML = `
-          <div class="col-span-full py-12 px-4 border-2 border-dashed border-slate-800 rounded-2xl text-center bg-slate-950/30">
+          <div class="col-span-full py-12 px-4 border-2 border-dashed border-slate-800 rounded-2xl text-center bg-slate-950/40">
             <span class="text-4xl animate-pickle-bounce block mb-2 select-none">🏓</span>
-            <h4 class="text-slate-300 font-semibold text-sm">No Active Round in Progress</h4>
-            <p class="text-xs text-slate-500 max-w-sm mx-auto mt-1">
-              Configure your players and courts, then click <strong>"Generate Next Round"</strong> to start matching!
+            <h4 class="text-slate-200 font-extrabold text-base">No Active Round in Progress</h4>
+            <p class="text-sm text-slate-400 max-w-sm mx-auto mt-1 font-medium">
+              Tap <strong>"Generate Next Round"</strong> to create balanced court pairings.
             </p>
           </div>
         `;
@@ -1161,93 +1078,75 @@
 
       state.activeMatches.forEach((match, idx) => {
         const courtCard = document.createElement('div');
-        courtCard.className = `bg-slate-950/90 border rounded-2xl p-4 shadow-xl transition relative overflow-hidden flex flex-col justify-between ${
-          match.finished ? 'border-emerald-500/50 ring-1 ring-emerald-500/20' : 'border-slate-800'
+        courtCard.className = `bg-slate-950 border-2 rounded-2xl p-4 sm:p-5 shadow-2xl transition relative flex flex-col justify-between ${
+          match.finished ? 'border-emerald-500/60 ring-2 ring-emerald-500/30' : 'border-slate-800'
         }`;
 
-        // Header badge icon
-        const badgeColor = match.courtType.includes('beg') 
-          ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' 
-          : (match.courtType.includes('int') 
-              ? 'bg-teal-500/10 text-teal-400 border-teal-500/30' 
-              : 'bg-lime-500/10 text-lime-400 border-lime-500/30');
-
-        const modeIcon = match.courtType.includes('beg') 
-          ? '<span class="animate-leaf-sway mr-1">🌱</span>' 
-          : (match.courtType.includes('int') 
-              ? '<span class="animate-energy-pulse mr-1">⚡</span>' 
-              : '<span class="animate-pickle-bounce mr-1">🥒</span>');
-
         courtCard.innerHTML = `
-          <!-- Top Court Ribbon -->
-          <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+          <!-- Court Header -->
+          <div class="flex items-center justify-between pb-3 border-b-2 border-slate-800">
             <div class="flex items-center gap-2">
-              <span class="w-7 h-7 rounded-lg bg-lime-400 text-slate-950 font-black text-xs flex items-center justify-center shadow">
+              <span class="w-9 h-9 rounded-xl bg-lime-400 text-slate-950 font-black text-sm flex items-center justify-center shadow">
                 C${match.courtNumber}
               </span>
-              <h4 class="font-bold text-white text-sm flex items-center gap-1.5">
+              <h4 class="font-black text-white text-base sm:text-lg flex items-center gap-1.5">
                 <span>Court ${match.courtNumber}</span>
-                <span class="text-xs animate-pickle-bounce select-none">🎾</span>
               </h4>
             </div>
-            <span class="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full border ${badgeColor} flex items-center">
-              ${modeIcon} ${match.modeLabel}
+            <span class="text-xs font-black uppercase px-3 py-1 rounded-full border border-lime-400/30 bg-lime-400/10 text-lime-300">
+              ${match.modeLabel}
             </span>
           </div>
 
-          <!-- Pickleball Net Visual Graphic & Matchup -->
+          <!-- Teams -->
           <div class="my-4 space-y-3">
-            
-            <!-- Team 1 -->
-            <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5">
-              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between mb-1">
+            <div class="bg-slate-900/90 border-2 border-slate-800 rounded-xl p-3">
+              <span class="text-xs font-black text-slate-400 uppercase tracking-wider flex items-center justify-between mb-2">
                 <span>Team 1</span>
-                <span class="text-xs">🟦</span>
+                <span>🟦</span>
               </span>
-              <div class="space-y-1">
+              <div class="space-y-1.5">
                 ${match.teamA.map(id => renderPlayerBadge(id)).join('')}
               </div>
             </div>
 
-            <!-- Net / VS Divider -->
+            <!-- Net Divider -->
             <div class="relative flex items-center justify-center py-1">
-              <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-dashed border-slate-700"></div></div>
-              <span class="relative px-3 py-0.5 rounded-full bg-slate-800 text-[10px] font-black text-lime-400 uppercase tracking-widest border border-slate-700 animate-net-pulse flex items-center gap-1">
-                <span class="text-[10px]">🏓</span> NET <span class="text-[10px]">🏓</span>
+              <div class="absolute inset-0 flex items-center"><div class="w-full border-t-2 border-dashed border-slate-700"></div></div>
+              <span class="relative px-4 py-1 rounded-full bg-slate-800 text-xs font-black text-lime-400 uppercase tracking-widest border border-slate-700 animate-net-pulse flex items-center gap-1.5 shadow">
+                <span>🏓</span> NET <span>🏓</span>
               </span>
             </div>
 
-            <!-- Team 2 -->
-            <div class="bg-slate-900/90 border border-slate-800 rounded-xl p-2.5">
-              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between mb-1">
+            <div class="bg-slate-900/90 border-2 border-slate-800 rounded-xl p-3">
+              <span class="text-xs font-black text-slate-400 uppercase tracking-wider flex items-center justify-between mb-2">
                 <span>Team 2</span>
-                <span class="text-xs">🟧</span>
+                <span>🟧</span>
               </span>
-              <div class="space-y-1">
+              <div class="space-y-1.5">
                 ${match.teamB.map(id => renderPlayerBadge(id)).join('')}
               </div>
             </div>
-
           </div>
 
-          <!-- Score & Completion Toggle -->
-          <div class="pt-3 border-t border-slate-800 flex items-center justify-between gap-2 mt-auto">
-            <div class="flex items-center gap-1.5 text-xs">
-              <span class="text-slate-400 text-[11px]">Score:</span>
-              <input type="number" min="0" max="30" value="${match.scoreA !== null ? match.scoreA : ''}" placeholder="T1" id="scoreA_${idx}" class="w-12 h-7 bg-slate-900 border border-slate-700 rounded text-center text-xs text-white font-bold focus:outline-none focus:border-lime-500">
-              <span class="text-slate-500 font-bold">:</span>
-              <input type="number" min="0" max="30" value="${match.scoreB !== null ? match.scoreB : ''}" placeholder="T2" id="scoreB_${idx}" class="w-12 h-7 bg-slate-900 border border-slate-700 rounded text-center text-xs text-white font-bold focus:outline-none focus:border-lime-500">
-              <button onclick="saveScoreForCourt(${idx})" class="h-7 px-2 bg-slate-800 hover:bg-slate-700 text-lime-400 rounded text-[11px] font-semibold border border-slate-700 transition flex items-center gap-1" title="Save Score & Update Win/Loss">
-                <span>Save</span>
+          <!-- Score & Done Button -->
+          <div class="pt-3 border-t-2 border-slate-800 flex items-center justify-between gap-2 mt-auto">
+            <div class="flex items-center gap-2">
+              <span class="text-slate-400 text-xs font-black uppercase">Score:</span>
+              <input type="number" min="0" max="30" value="${match.scoreA !== null ? match.scoreA : ''}" placeholder="T1" id="scoreA_${idx}" class="w-14 h-10 bg-slate-900 border-2 border-slate-700 rounded-lg text-center text-sm text-white font-black focus:outline-none focus:border-lime-500">
+              <span class="text-slate-500 font-black">:</span>
+              <input type="number" min="0" max="30" value="${match.scoreB !== null ? match.scoreB : ''}" placeholder="T2" id="scoreB_${idx}" class="w-14 h-10 bg-slate-900 border-2 border-slate-700 rounded-lg text-center text-sm text-white font-black focus:outline-none focus:border-lime-500">
+              <button onclick="saveScoreForCourt(${idx})" class="h-10 px-3 bg-slate-800 hover:bg-slate-700 text-lime-400 rounded-lg text-xs font-black border border-slate-700 transition active:scale-95">
+                Save
               </button>
             </div>
 
-            <button onclick="toggleMatchFinished(${idx})" class="text-xs px-2.5 py-1 rounded-lg font-semibold transition flex items-center gap-1 ${
+            <button onclick="toggleMatchFinished(${idx})" class="h-10 px-4 rounded-xl text-xs sm:text-sm font-black transition active:scale-95 ${
               match.finished 
-                ? 'bg-emerald-500 text-slate-950 font-bold shadow-md shadow-emerald-500/20' 
-                : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700'
+                ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/25' 
+                : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700'
             }">
-              <span>${match.finished ? '🏆 Final' : '⏳ Playing'}</span>
+              <span>${match.finished ? '🏆 Final' : '⏳ Live'}</span>
             </button>
           </div>
         `;
@@ -1258,17 +1157,17 @@
 
     function renderPlayerBadge(id) {
       const p = state.players.find(x => x.id === id);
-      if (!p) return '<div class="text-xs text-slate-500">Unknown</div>';
+      if (!p) return '<div class="text-sm text-slate-500">Unknown</div>';
 
       const isBeg = p.skill === 'beginner';
       return `
-        <div class="flex items-center justify-between text-xs py-1 px-2 rounded-lg bg-slate-950/60 border border-slate-800">
-          <span class="font-semibold text-slate-200 truncate flex items-center gap-1.5">
+        <div class="flex items-center justify-between py-2 px-3 rounded-lg bg-slate-950 border border-slate-800">
+          <span class="font-extrabold text-sm sm:text-base text-slate-100 flex items-center gap-2">
             <span class="${isBeg ? 'animate-leaf-sway' : 'animate-energy-pulse'} select-none">${isBeg ? '🌱' : '⚡'}</span>
             <span>${escapeHtml(p.name)}</span>
           </span>
-          <span class="text-[10px] font-bold px-1.5 py-0.2 rounded ${isBeg ? 'bg-emerald-500/20 text-emerald-300' : 'bg-teal-500/20 text-teal-300'}">
-            ${isBeg ? 'Beginner' : 'Intermediate'}
+          <span class="text-xs font-black px-2 py-0.5 rounded-full ${isBeg ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}">
+            ${isBeg ? '🌱 BEG' : '⚡ INT'}
           </span>
         </div>
       `;
@@ -1285,7 +1184,7 @@
       tbody.innerHTML = '';
 
       if (state.players.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-xs text-slate-500">No player data.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-sm text-slate-500 font-semibold">No players registered.</td></tr>`;
         return;
       }
 
@@ -1298,25 +1197,25 @@
         const isBenched = state.currentBench.includes(p.id);
         const isBeg = p.skill === 'beginner';
         const tr = document.createElement('tr');
-        tr.className = `hover:bg-slate-900/60 transition ${isBenched ? 'bg-amber-950/10' : ''}`;
+        tr.className = `hover:bg-slate-800/50 transition ${isBenched ? 'bg-amber-950/20' : ''}`;
 
         tr.innerHTML = `
-          <td class="py-2 px-2 font-semibold text-slate-200 truncate max-w-[120px]">
-            <span class="mr-1 ${isBeg ? 'animate-leaf-sway' : 'animate-energy-pulse'} select-none">${isBeg ? '🌱' : '⚡'}</span>
+          <td class="py-3 px-3 font-extrabold text-base text-slate-100">
+            <span class="mr-1.5 ${isBeg ? 'animate-leaf-sway' : 'animate-energy-pulse'} select-none">${isBeg ? '🌱' : '⚡'}</span>
             ${escapeHtml(p.name)}
           </td>
-          <td class="py-2 px-2">
-            <span class="text-[10px] px-1.5 py-0.5 rounded font-bold ${isBeg ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-teal-500/10 text-teal-400 border border-teal-500/20'}">
+          <td class="py-3 px-3">
+            <span class="text-xs px-2 py-0.5 rounded-full font-black ${isBeg ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}">
               ${isBeg ? 'BEG' : 'INT'}
             </span>
           </td>
-          <td class="py-2 px-2 text-center font-bold text-slate-100">${p.gamesPlayed}</td>
-          <td class="py-2 px-2 text-center text-slate-300">${p.gamesBenched}</td>
-          <td class="py-2 px-2 text-center font-bold ${p.consecutiveBench >= 2 ? 'text-rose-400 font-extrabold flex items-center justify-center gap-0.5' : (p.consecutiveBench === 1 ? 'text-amber-400' : 'text-slate-500')}">
-            ${p.consecutiveBench >= 2 ? '<span class="animate-bounce">⚠️</span>' : ''}${p.consecutiveBench}
+          <td class="py-3 px-3 text-center font-black text-lg text-lime-400">${p.gamesPlayed}</td>
+          <td class="py-3 px-3 text-center text-slate-300 text-base">${p.gamesBenched}</td>
+          <td class="py-3 px-3 text-center font-black ${p.consecutiveBench >= 2 ? 'text-rose-400 text-base' : (p.consecutiveBench === 1 ? 'text-amber-400 text-base' : 'text-slate-500')}">
+            ${p.consecutiveBench >= 2 ? '⚠️ ' : ''}${p.consecutiveBench}
           </td>
-          <td class="py-2 px-2 text-center text-[11px] text-slate-300">
-            <span class="text-emerald-400 font-semibold">${p.wins || 0}</span> / <span class="text-rose-400 font-semibold">${p.losses || 0}</span>
+          <td class="py-3 px-3 text-center text-sm font-black">
+            <span class="text-emerald-400">${p.wins || 0}W</span> - <span class="text-rose-400">${p.losses || 0}L</span>
           </td>
         `;
         tbody.appendChild(tr);
@@ -1330,13 +1229,13 @@
       document.getElementById('historyRoundsCount').textContent = `${state.roundHistory.length} round${state.roundHistory.length === 1 ? '' : 's'} recorded`;
 
       if (state.roundHistory.length === 0) {
-        container.innerHTML = `<p class="text-xs text-slate-500 italic py-2">No prior rounds recorded yet.</p>`;
+        container.innerHTML = `<p class="text-sm text-slate-500 italic py-2">No prior rounds recorded yet.</p>`;
         return;
       }
 
       state.roundHistory.forEach(r => {
         const card = document.createElement('div');
-        card.className = "p-3 rounded-xl bg-slate-900/70 border border-slate-800/80 text-xs space-y-2";
+        card.className = "p-3.5 rounded-xl bg-slate-950 border border-slate-800 text-sm space-y-2";
 
         const benchNames = r.bench.map(id => {
           const p = state.players.find(x => x.id === id);
@@ -1349,22 +1248,22 @@
           const scoreStr = (m.scoreA !== null && m.scoreB !== null && (m.scoreA > 0 || m.scoreB > 0)) 
             ? `(${m.scoreA}-${m.scoreB})` 
             : '';
-          return `<span class="bg-slate-950 px-2 py-1 rounded border border-slate-800 text-[11px]"><strong>C${m.courtNumber}:</strong> ${tA} vs ${tB} <span class="text-lime-400 font-bold">${scoreStr}</span></span>`;
+          return `<span class="bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800 text-xs font-bold"><strong>C${m.courtNumber}:</strong> ${tA} vs ${tB} <span class="text-lime-400 font-black">${scoreStr}</span></span>`;
         }).join(' ');
 
         card.innerHTML = `
-          <div class="flex items-center justify-between border-b border-slate-800 pb-1.5">
-            <span class="font-bold text-white flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-lime-400"></span> Round ${r.roundNumber}
-              <span class="text-[10px] text-slate-400 font-normal">(${r.timestamp})</span>
+          <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+            <span class="font-black text-white flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-lime-400"></span> Round ${r.roundNumber}
+              <span class="text-xs text-slate-400 font-normal">(${r.timestamp})</span>
             </span>
-            <span class="text-[10px] uppercase font-semibold text-slate-400">${getModeLabel(r.mode)}</span>
+            <span class="text-xs uppercase font-extrabold text-lime-400">${getModeLabel(r.mode)}</span>
           </div>
-          <div class="flex flex-wrap gap-1.5 pt-1">
+          <div class="flex flex-wrap gap-2 pt-1">
             ${matchesSummary}
           </div>
-          <div class="text-[10px] text-slate-400 pt-1 border-t border-slate-800/50 flex items-center gap-1">
-            <i data-lucide="coffee" class="w-3 h-3 text-amber-400"></i>
+          <div class="text-xs text-slate-400 pt-1.5 border-t border-slate-800 flex items-center gap-1 font-semibold">
+            <i data-lucide="coffee" class="w-3.5 h-3.5 text-amber-400"></i>
             <span>Benched: <strong class="text-slate-300">${escapeHtml(benchNames)}</strong></span>
           </div>
         `;
@@ -1387,7 +1286,7 @@
     }
 
     /* ----------------------------------------------------
-       Notifications & Utilities
+       Notifications & Reset
        ---------------------------------------------------- */
     let noticeTimeout = null;
 
@@ -1399,18 +1298,18 @@
       clearTimeout(noticeTimeout);
 
       textEl.textContent = text;
-      banner.classList.remove('hidden', 'bg-emerald-950/80', 'border-emerald-500/40', 'text-emerald-200',
-        'bg-rose-950/80', 'border-rose-500/40', 'text-rose-200',
-        'bg-slate-800', 'border-slate-700', 'text-slate-200');
+      banner.classList.remove('hidden', 'bg-emerald-950', 'border-emerald-500', 'text-emerald-200',
+        'bg-rose-950', 'border-rose-500', 'text-rose-200',
+        'bg-slate-900', 'border-slate-700', 'text-slate-200');
 
       if (type === 'success') {
-        banner.classList.add('bg-emerald-950/80', 'border-emerald-500/40', 'text-emerald-200');
+        banner.classList.add('bg-emerald-950', 'border-emerald-500', 'text-emerald-200');
         icon.setAttribute('data-lucide', 'check-circle-2');
       } else if (type === 'error') {
-        banner.classList.add('bg-rose-950/80', 'border-rose-500/40', 'text-rose-200');
+        banner.classList.add('bg-rose-950', 'border-rose-500', 'text-rose-200');
         icon.setAttribute('data-lucide', 'alert-circle');
       } else {
-        banner.classList.add('bg-slate-800', 'border-slate-700', 'text-slate-200');
+        banner.classList.add('bg-slate-900', 'border-slate-700', 'text-slate-200');
         icon.setAttribute('data-lucide', 'info');
       }
 
@@ -1438,7 +1337,8 @@
         p.wins = 0;
         p.losses = 0;
       });
-      showNotice("Session reset! Player stats and rounds cleared.", "info");
+      saveState();
+      showNotice("Session reset! Player stats cleared.", "info");
       renderAll();
     }
 
